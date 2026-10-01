@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: restaurantos-backend
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: DATABASE_URL
+        value: postgresql://restaurant_backend:RestaurantOS_2026_SecureDb!@db.ivfvxnwciuqicqqnlbtx.supabase.co:5432/postgres?sslmode=require
+      - key: DIRECT_URL
+        value: postgresql://restaurant_backend:RestaurantOS_2026_SecureDb!@db.ivfvxnwciuqicqqnlbtx.supabase.co:5432/postgres?sslmode=require
+      - key: SUPABASE_URL
+        value: https://ivfvxnwciuqicqqnlbtx.supabase.co
+      - key: SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2ZnZ4bndjaXVxaWNxcW5sYnR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1ODU3MDAsImV4cCI6MjA3ODE2MTcwMH0.c-PfjifYWi5_lxK0VGXKRmUo8zhoXHz7NYR4zV6Usmg
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2ZnZ4bndjaXVxaWNxcW5sYnR4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MjU4NTcwMCwiZXhwIjoyMDc4MTYxNzAwfQ.WzFP9T5LBNHjHrFyRIKKC890bl4FiyRvkrqQT9Z0Hck
+      - key: SUPABASE_JWT_SECRET
+        value: super-secret-jwt-token-with-minimum-32-chars-long
+      - key: CORS_ORIGINS
+        value: "*"

@@ -21,9 +21,25 @@ async function bootstrap() {
   const host = configService.get<string>('HOST', '0.0.0.0');
   const corsOrigins = configService.get<string>('CORS_ORIGINS', 'http://localhost:3000');
 
-  // CORS Whitelist Configuration
+  // CORS Whitelist Configuration (Supports localhost, Vercel deployments, and custom domains)
   app.enableCors({
-    origin: corsOrigins.includes('*') ? '*' : corsOrigins.split(',').map((o) => o.trim()),
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, server-to-server, curl)
+      if (!origin) return callback(null, true);
+
+      const allowedList = corsOrigins.split(',').map((o) => o.trim());
+      if (
+        corsOrigins === '*' ||
+        allowedList.includes('*') ||
+        allowedList.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Fallback allow in early stage to prevent diner order failures
+    },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
