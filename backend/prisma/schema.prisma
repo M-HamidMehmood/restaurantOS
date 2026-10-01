@@ -1,0 +1,173 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+enum TableStatus {
+  available
+  occupied
+  bill_requested
+}
+
+enum OrderStatus {
+  pending
+  accepted
+  preparing
+  ready
+  served
+  completed
+  cancelled
+}
+
+enum PaymentStatus {
+  unpaid
+  paid
+}
+
+enum PaymentMethod {
+  cash
+  card
+  upi_online @map("upi/online")
+}
+
+enum ServiceRequestType {
+  call_waiter
+  bill_request
+}
+
+enum ServiceRequestStatus {
+  pending
+  resolved
+}
+
+// ----------------------------------------------------
+// 1. TABLES
+// ----------------------------------------------------
+model Table {
+  id          String           @id @default(uuid()) @db.Uuid
+  tableNumber String           @unique @map("table_number")
+  qrSlug      String           @unique @map("qr_slug")
+  status      TableStatus      @default(available)
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  orders      Order[]
+  serviceReqs ServiceRequest[]
+
+  @@index([status])
+  @@index([qrSlug])
+  @@map("tables")
+}
+
+// ----------------------------------------------------
+// 2. CATEGORIES
+// ----------------------------------------------------
+model Category {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  sortOrder Int        @default(0) @map("sort_order")
+  isActive  Boolean    @default(true) @map("is_active")
+  menuItems MenuItem[]
+
+  @@index([sortOrder])
+  @@index([isActive])
+  @@map("categories")
+}
+
+// ----------------------------------------------------
+// 3. MENU ITEMS
+// ----------------------------------------------------
+model MenuItem {
+  id          String         @id @default(uuid()) @db.Uuid
+  categoryId  String         @map("category_id") @db.Uuid
+  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  description String?        @db.Text
+  basePrice   Decimal        @map("base_price") @db.Decimal(10, 2)
+  imageUrl    String?        @map("image_url") @db.Text
+  isAvailable Boolean        @default(true) @map("is_available") // "86" switch for instant 86-ing
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  modifiers   ItemModifier[]
+  orderItems  OrderItem[]
+
+  @@index([categoryId])
+  @@index([isAvailable])
+  @@map("menu_items")
+}
+
+// ----------------------------------------------------
+// 4. ITEM MODIFIERS
+// ----------------------------------------------------
+model ItemModifier {
+  id         String   @id @default(uuid()) @db.Uuid
+  menuItemId String   @map("menu_item_id") @db.Uuid
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  name       String
+  priceExtra Decimal  @default(0) @map("price_extra") @db.Decimal(10, 2)
+
+  @@index([menuItemId])
+  @@map("item_modifiers")
+}
+
+// ----------------------------------------------------
+// 5. ORDERS
+// ----------------------------------------------------
+model Order {
+  id            String        @id @default(uuid()) @db.Uuid
+  tableId       String        @map("table_id") @db.Uuid
+  table         Table         @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  status        OrderStatus   @default(pending)
+  totalAmount   Decimal       @map("total_amount") @db.Decimal(10, 2)
+  paymentStatus PaymentStatus @default(unpaid) @map("payment_status")
+  paymentMethod PaymentMethod?@map("payment_method")
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  orderItems    OrderItem[]
+
+  @@index([tableId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+// ----------------------------------------------------
+// 6. ORDER ITEMS
+// ----------------------------------------------------
+model OrderItem {
+  id                String   @id @default(uuid()) @db.Uuid
+  orderId           String   @map("order_id") @db.Uuid
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId        String   @map("menu_item_id") @db.Uuid
+  menuItem          MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  quantity          Int      @default(1)
+  unitPrice         Decimal  @map("unit_price") @db.Decimal(10, 2)
+  selectedModifiers Json?    @default("[]") @map("selected_modifiers") @db.JsonB
+  notes             String?  @db.Text
+
+  @@index([orderId])
+  @@index([menuItemId])
+  @@map("order_items")
+}
+
+// ----------------------------------------------------
+// 7. SERVICE REQUESTS
+// ----------------------------------------------------
+model ServiceRequest {
+  id        String               @id @default(uuid()) @db.Uuid
+  tableId   String               @map("table_id") @db.Uuid
+  table     Table                @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  type      ServiceRequestType
+  status    ServiceRequestStatus @default(pending)
+  createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tableId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("service_requests")
+}

@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 30 20% 98%;
+    --foreground: 24 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 24 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 10% 10%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 24 10% 10%;
+    --secondary: 30 15% 94%;
+    --secondary-foreground: 24 10% 15%;
+    --muted: 30 15% 94%;
+    --muted-foreground: 25 5% 45%;
+    --accent: 38 92% 95%;
+    --accent-foreground: 24 10% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 15% 90%;
+    --input: 30 15% 90%;
+    --ring: 38 92% 50%;
+    --radius: 0.85rem;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    min-height: 100vh;
+    font-family: inherit;
+  }
+}
+
+/* Custom scrollbar hide for clean mobile horizontal pill navigation */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.03);
+  }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ==========================================================================
+   80mm Thermal Printer Styling (Kitchen Order Ticket - KOT)
+   ========================================================================== */
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0mm;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Courier New', Courier, monospace, monospace !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide entire admin UI layout, sidebar, header, banners during print */
+  .no-print,
+  nav,
+  aside,
+  header,
+  button,
+  .sonner-toast,
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  /* Force display of the targeted KOT thermal print slip & Customer Bill */
+  .kot-thermal-print-container,
+  .customer-bill-print-container {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 76mm !important;
+    max-width: 80mm !important;
+    padding: 3mm 2mm !important;
+    margin: 0 auto !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+}
+
