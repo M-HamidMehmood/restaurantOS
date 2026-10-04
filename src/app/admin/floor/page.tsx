@@ -44,8 +44,13 @@ export default function FloorAndBillingPage() {
   const handleSimulateOrder = async () => {
     setIsSimulatingOrder(true);
     try {
-      const availableTableNums = ['T-02', 'T-03', 'T-04', 'T-05', 'T-06', 'T-07', 'T-08'];
-      const chosenTable = availableTableNums[Math.floor(Math.random() * availableTableNums.length)];
+      // Pick a table that is NOT currently bill_requested
+      const nonBilling = tables.filter((t) => t.status !== 'bill_requested');
+      const tablePool =
+        nonBilling.length > 0
+          ? nonBilling.map((t) => t.tableNumber)
+          : ['T-01', 'T-04', 'T-05', 'T-06', 'T-07', 'T-08'];
+      const chosenTable = tablePool[Math.floor(Math.random() * tablePool.length)];
 
       const samplePayload = {
         tableId: chosenTable,
@@ -68,20 +73,24 @@ export default function FloorAndBillingPage() {
         notes: 'Simulated customer dine-in tab',
       };
 
-      const res = await fetch('http://localhost:4000/api/orders', {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const res = await fetch(`${apiBase}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(samplePayload),
       });
 
       if (res.ok) {
-        toast.success(`Dispatched simulated order for Table ${chosenTable}!`);
-        fetchFloorData();
+        const data = await res.json().catch(() => null);
+        const orderId = data?.data?.orderId || data?.orderId || '';
+        toast.success(`Dispatched simulated order ${orderId ? `#${orderId} ` : ''}for Table ${chosenTable}!`);
+        await fetchFloorData();
       } else {
-        toast.info(`Simulated order dispatched locally.`);
+        const errorData = await res.json().catch(() => null);
+        toast.error(errorData?.message || `Failed to dispatch order for Table ${chosenTable}`);
       }
-    } catch (e) {
-      toast.info('Simulated order generated.');
+    } catch (e: any) {
+      toast.error(e?.message || 'Network error simulating order.');
     } finally {
       setIsSimulatingOrder(false);
     }
@@ -91,10 +100,14 @@ export default function FloorAndBillingPage() {
   const handleSimulateWaiterCall = async () => {
     setIsSimulatingWaiterCall(true);
     try {
-      const sampleTables = ['T-03', 'T-04', 'T-06'];
-      const chosenTable = sampleTables[Math.floor(Math.random() * sampleTables.length)];
+      const tablePool =
+        tables.length > 0
+          ? tables.map((t) => t.tableNumber)
+          : ['T-01', 'T-04', 'T-06'];
+      const chosenTable = tablePool[Math.floor(Math.random() * tablePool.length)];
 
-      const res = await fetch('http://localhost:4000/api/service/call-waiter', {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const res = await fetch(`${apiBase}/service/call-waiter`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -106,12 +119,13 @@ export default function FloorAndBillingPage() {
 
       if (res.ok) {
         toast.warning(`Waiter assistance call simulated for Table ${chosenTable}!`);
-        fetchFloorData();
+        await fetchFloorData();
       } else {
-        toast.info(`Waiter call triggered.`);
+        const errorData = await res.json().catch(() => null);
+        toast.error(errorData?.message || `Failed to trigger waiter call for Table ${chosenTable}`);
       }
-    } catch (e) {
-      toast.info('Waiter call simulated.');
+    } catch (e: any) {
+      toast.error(e?.message || 'Network error simulating waiter call.');
     } finally {
       setIsSimulatingWaiterCall(false);
     }

@@ -56,8 +56,9 @@ export function OperationsDashboard() {
   const handleSimulateOrder = async () => {
     setIsSimulating(true);
     try {
-      const randomTables = ['T-01', 'T-02', 'T-03', 'T-04', 'T-05', 'T-06', 'T-08'];
-      const chosenTable = randomTables[Math.floor(Math.random() * randomTables.length)];
+      // Pick available tables that are not in billing finalization
+      const safeTables = ['T-01', 'T-02', 'T-04', 'T-05', 'T-06', 'T-07', 'T-08'];
+      const chosenTable = safeTables[Math.floor(Math.random() * safeTables.length)];
 
       const samplePayload = {
         tableId: chosenTable,
@@ -80,20 +81,24 @@ export function OperationsDashboard() {
         notes: 'Table guest simulation test order',
       };
 
-      const res = await fetch('http://localhost:4000/api/orders', {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const res = await fetch(`${apiBase}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(samplePayload),
       });
 
       if (res.ok) {
-        toast.success(`Dispatched simulated order for ${chosenTable}! Live stream received.`);
-        refreshOrders();
+        const data = await res.json().catch(() => null);
+        const orderId = data?.data?.orderId || data?.orderId || '';
+        toast.success(`Dispatched simulated order ${orderId ? `#${orderId} ` : ''}for Table ${chosenTable}! Live stream received.`);
+        await refreshOrders();
       } else {
-        toast.info(`Simulated ticket dispatched locally.`);
+        const errorData = await res.json().catch(() => null);
+        toast.error(errorData?.message || `Failed to dispatch order for Table ${chosenTable}`);
       }
-    } catch (e) {
-      toast.info('Simulated order generated.');
+    } catch (e: any) {
+      toast.error(e?.message || 'Network error simulating order.');
     } finally {
       setIsSimulating(false);
     }
