@@ -111,21 +111,54 @@
 
 ---
 
-## 6. Development & Operational Commands
+## 6. Fast Project Run & Operational Commands
 
-### Local Development
+### ⚡ Quick-Start (Run Both in 2 Steps)
+
 ```bash
-# 1. Start Backend (Port 4000)
-# NOTE: Requires network access to Supabase DB (use BypassSandbox: true if sandboxed)
+# Terminal 1: Start Backend (Port 4000)
+# NOTE: Connects to remote Supabase DB (use BypassSandbox: true if executing via agent)
 cd backend && node dist/src/main.js
 
-# 2. Start Frontend (Port 3000)
+# Terminal 2: Start Frontend (Port 3000)
 npm run dev
-# OR for production build:
-npm run build && npm run start -- -p 3000
 ```
 
-### Git & Deployment
+### 🧭 Active Local Portals & URLs
+- **Customer QR Menu**: [`http://localhost:3000`](http://localhost:3000)
+- **Live Kitchen Operations (KDS & Kanban)**: [`http://localhost:3000/admin/live`](http://localhost:3000/admin/live)
+- **Floor Grid & Bill Settlement**: [`http://localhost:3000/admin/floor`](http://localhost:3000/admin/floor)
+- **Menu Manager & 86 Switches**: [`http://localhost:3000/admin/menu`](http://localhost:3000/admin/menu)
+- **Backend Health Check**: [`http://localhost:4000/api/health`](http://localhost:4000/api/health)
+- **OpenAPI Swagger Docs**: [`http://localhost:4000/docs`](http://localhost:4000/docs)
+
+### 🧹 Port Conflicts & Process Management
+If ports 4000 or 3000 are already bound:
+```bash
+# Clear hanging processes on ports 4000, 3000, 3001
+lsof -ti :4000,3000,3001 | xargs kill -9 2>/dev/null
+
+# If port 3000 is occupied by another app, run frontend on 3001:
+npm run dev -- -p 3001
+```
+
+### 🔄 Rebuilding Backend After Code Changes
+```bash
+cd backend && npm run build && node dist/src/main.js
+```
+
+### 🧪 Fast Health & Simulation Verification
+```bash
+# 1. Verify Backend is responding
+curl -s http://localhost:4000/api/health
+
+# 2. Dispatch a quick simulated order to Table T-04
+curl -s -X POST http://localhost:4000/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{"tableId":"T-04","items":[{"menuItemId":"c0000000-0000-0000-0000-000000000001","quantity":1,"selectedModifiers":[],"notes":"Fast verify order"}]}'
+```
+
+### 🚀 Git & Deployment
 ```bash
 # Commit & push changes (Vercel automatically redeploys production frontend)
 git add .
