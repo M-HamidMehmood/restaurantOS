@@ -163,21 +163,59 @@ export function useSubmitOrderMutation() {
       totalAmount,
       notes,
     }: OrderSubmissionPayload): Promise<ActiveOrder> => {
-      // In production: POST /api/orders { tableId, items, totalAmount, notes }
-      await new Promise((r) => setTimeout(r, 650));
+      const payload = {
+        tableId: tableId.trim(),
+        notes: notes || undefined,
+        totalAmount: Math.round(totalAmount),
+        items: items.map((ci) => ({
+          menuItemId: ci.item.id,
+          name: ci.item.name,
+          item: {
+            id: ci.item.id,
+            name: ci.item.name,
+            price: ci.item.price,
+          },
+          quantity: ci.quantity,
+          notes: ci.notes || undefined,
+          cartItemId: ci.cartItemId,
+          unitPrice: ci.unitPrice,
+          totalPrice: ci.totalPrice,
+          selectedModifiers: (ci.selectedModifiers || []).map((m) => ({
+            id: m.optionId,
+            optionId: m.optionId,
+            name: m.optionName || 'Modifier',
+            optionName: m.optionName || 'Modifier',
+            priceExtra: m.price || 0,
+            price: m.price || 0,
+          })),
+        })),
+      };
 
-      const orderId = `ORD-${Date.now().toString().slice(-4)}`;
+      const res = await fetch(`${API_BASE}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Failed to submit order to kitchen');
+      }
+
+      const resJson = await res.json();
+      const serverData = resJson.data || resJson;
+      const orderId = serverData.orderId || serverData.id || `ORD-${Date.now().toString().slice(-4)}`;
       const now = Date.now();
 
       const newOrder: ActiveOrder = {
         orderId,
-        tableId,
+        tableId: serverData.tableNumber || tableId,
         items,
-        totalAmount,
+        totalAmount: serverData.totalAmount || totalAmount,
         notes,
         status: 'received',
         createdAt: now,
-        estimatedMinutes: 12,
+        estimatedMinutes: serverData.estimatedMinutes || 12,
         statusHistory: [
           {
             status: 'received',
@@ -192,7 +230,7 @@ export function useSubmitOrderMutation() {
   });
 }
 
-// Mutation for calling the waiter: POST /api/service/call-waiter
+// Mutation for calling the waiter: POST /api/service-request
 export function useCallWaiterMutation() {
   return useMutation({
     mutationFn: async ({
@@ -204,20 +242,36 @@ export function useCallWaiterMutation() {
       reason: WaiterReason;
       customNote?: string;
     }) => {
-      // In production: POST /api/service/call-waiter
-      await new Promise((r) => setTimeout(r, 400));
+      const res = await fetch(`${API_BASE}/service-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tableId,
+          type: 'call_waiter',
+          reason,
+          customNote,
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.message || 'Failed to call waiter');
+      }
+
+      const json = await res.json();
       return {
         success: true,
         tableId,
         reason,
         customNote,
         timestamp: Date.now(),
+        ...json,
       };
     },
   });
 }
 
-// Mutation for requesting the bill: POST /api/service/request-bill
+// Mutation for requesting the bill: POST /api/service-request
 export function useRequestBillMutation() {
   return useMutation({
     mutationFn: async ({
@@ -229,14 +283,30 @@ export function useRequestBillMutation() {
       paymentMethod: PaymentMethod;
       customNote?: string;
     }) => {
-      // In production: POST /api/service/request-bill
-      await new Promise((r) => setTimeout(r, 400));
+      const res = await fetch(`${API_BASE}/service-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tableId,
+          type: 'bill_request',
+          paymentMethod,
+          customNote,
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.message || 'Failed to request bill');
+      }
+
+      const json = await res.json();
       return {
         success: true,
         tableId,
         paymentMethod,
         customNote,
         timestamp: Date.now(),
+        ...json,
       };
     },
   });

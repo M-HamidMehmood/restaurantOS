@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { eq, and, inArray, desc, or } from 'drizzle-orm';
+import { eq, and, inArray, desc, or, ilike } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service';
 import { tables } from '../../database/schema/tables.schema';
 import { menuItems } from '../../database/schema/menu.schema';
@@ -73,12 +73,22 @@ export class OrdersService {
     }> = [];
 
     for (const lineItem of dto.items) {
-      const dbItem = await this.databaseService.db.query.menuItems.findFirst({
-        where: eq(menuItems.id, lineItem.menuItemId),
-        with: {
-          modifiers: true,
-        },
-      });
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(lineItem.menuItemId);
+      let dbItem = isUuid
+        ? await this.databaseService.db.query.menuItems.findFirst({
+            where: eq(menuItems.id, lineItem.menuItemId),
+            with: { modifiers: true },
+          })
+        : null;
+
+      if (!dbItem) {
+        // Fallback: match by item name (e.g. from static fallback menu or slug)
+        const targetName = (lineItem as any).name || (lineItem as any).item?.name || lineItem.menuItemId.replace(/^(?:burger|shawarma|fries|roll|samosa|tea|beverage)-/i, '').replace(/-/g, ' ');
+        dbItem = await this.databaseService.db.query.menuItems.findFirst({
+          where: ilike(menuItems.name, `%${targetName}%`),
+          with: { modifiers: true },
+        });
+      }
 
       if (!dbItem) {
         throw new NotFoundException({
@@ -102,17 +112,21 @@ export class OrdersService {
       const selectedModifiersJson: Array<{ id?: string; name: string; priceExtra: number }> = [];
 
       for (const mod of lineItem.selectedModifiers || []) {
+        const isModUuid = mod.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(mod.id);
+        const modName = (mod.name || '').toLowerCase();
         const dbMod = dbItem.modifiers.find(
           (m) =>
-            m.id === mod.id ||
-            m.name.toLowerCase() === (mod.name || '').toLowerCase(),
+            (isModUuid && m.id === mod.id) ||
+            m.name.toLowerCase() === modName ||
+            m.name.toLowerCase().includes(modName) ||
+            modName.includes(m.name.toLowerCase()),
         );
 
         const priceExtra = dbMod ? dbMod.priceExtra : (mod.priceExtra ?? 0);
         itemModifiersTotal += priceExtra;
         selectedModifiersJson.push({
-          id: dbMod?.id || mod.id,
-          name: dbMod?.name || mod.name,
+          id: dbMod?.id || (isModUuid ? mod.id : undefined),
+          name: dbMod?.name || mod.name || 'Modifier',
           priceExtra,
         });
       }

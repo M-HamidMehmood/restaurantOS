@@ -15,6 +15,7 @@ export const modifierItemSchema = z.object({
 export const orderLineItemSchema = z
   .object({
     menuItemId: z.string().optional(),
+    name: z.string().optional(),
     item: z
       .object({
         id: z.string(),
@@ -38,6 +39,7 @@ export const orderLineItemSchema = z
     return {
       ...data,
       menuItemId: resolvedMenuItemId,
+      name: data.name || data.item?.name,
       selectedModifiers: (data.selectedModifiers || []).map((mod) => ({
         id: mod.id || mod.optionId,
         name: mod.name || mod.optionName || 'Modifier',

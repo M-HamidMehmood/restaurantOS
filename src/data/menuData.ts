@@ -250,7 +250,7 @@ export const drinkModifierGroups: ModifierGroup[] = [
 export const menuItems: MenuItem[] = [
   // ===================== BURGERS =====================
   {
-    id: 'burger-anda-shami',
+    id: 'c0000000-0000-0000-0000-000000000001',
     name: 'Anda Shami Burger',
     description: 'The legendary Pakistani street burger: spiced dal & beef shami patty, fried egg, shredded cabbage, and tangy mint raita in toasted sesame bun.',
     price: 280,
@@ -267,7 +267,7 @@ export const menuItems: MenuItem[] = [
     modifierGroups: burgerModifierGroups,
   },
   {
-    id: 'burger-zinger',
+    id: 'c0000000-0000-0000-0000-000000000002',
     name: 'Zinger Burger',
     description: 'Crunchy golden fried spiced chicken breast fillet, creamy mayo garlic sauce, crisp iceberg lettuce in a toasted bun.',
     price: 490,
@@ -284,7 +284,7 @@ export const menuItems: MenuItem[] = [
     modifierGroups: burgerModifierGroups,
   },
   {
-    id: 'burger-kababish',
+    id: 'c0000000-0000-0000-0000-000000000003',
     name: 'Kababish Burger',
     description: 'Charcoal-grilled spiced minced chicken seekh kabab, sliced red onions, chili garlic mayo, and chaat masala.',
     price: 450,

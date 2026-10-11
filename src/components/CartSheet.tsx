@@ -73,6 +73,9 @@ export const CartSheet: React.FC = () => {
             }
           );
         },
+        onError: (err: any) => {
+          toast.error(err?.message || 'Failed to send order to kitchen');
+        },
       }
     );
   };

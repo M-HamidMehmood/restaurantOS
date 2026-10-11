@@ -13,7 +13,8 @@ export class TablesService {
     if (/^T-\d+$/i.test(trimmed)) {
       return trimmed;
     }
-    const match = trimmed.match(/^T?0*(\d+)$/i);
+    const cleaned = trimmed.replace(/[\s-_]+/g, '');
+    const match = cleaned.match(/^(?:TABLE|T)?0*(\d+)$/i);
     if (match) {
       const num = parseInt(match[1], 10);
       return `T-${num.toString().padStart(2, '0')}`;
@@ -22,18 +23,30 @@ export class TablesService {
   }
 
   async findTable(identifier: string) {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
-    const normalized = this.normalizeTableNumber(identifier);
-    const slug = identifier.trim().toLowerCase();
+    const trimmed = identifier.trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed);
+    const normalized = this.normalizeTableNumber(trimmed);
+    const slug = trimmed.toLowerCase();
+    const digitMatch = trimmed.match(/\d+/);
+    const numSlug = digitMatch ? `table-${parseInt(digitMatch[0], 10)}` : slug;
 
     if (isUuid) {
       return this.databaseService.db.query.tables.findFirst({
-        where: or(eq(tables.id, identifier), eq(tables.tableNumber, normalized), eq(tables.qrSlug, slug)),
+        where: or(
+          eq(tables.id, trimmed),
+          eq(tables.tableNumber, normalized),
+          eq(tables.qrSlug, slug),
+          eq(tables.qrSlug, numSlug),
+        ),
       });
     }
 
     return this.databaseService.db.query.tables.findFirst({
-      where: or(eq(tables.tableNumber, normalized), eq(tables.qrSlug, slug)),
+      where: or(
+        eq(tables.tableNumber, normalized),
+        eq(tables.qrSlug, slug),
+        eq(tables.qrSlug, numSlug),
+      ),
     });
   }
 

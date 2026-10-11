@@ -100,10 +100,13 @@ export const useMenuStore = create<MenuState>()(
     (set, get) => ({
       tableId: 'T-04',
       setTableId: (id) => {
-        const clean = id.trim().toUpperCase();
-        if (!clean) return;
-        set({ tableId: clean });
-        toast.info(`Table updated to ${clean}`);
+        const raw = id.trim();
+        if (!raw) return;
+        const digitMatch = raw.match(/^(?:table|t)?[-\s_]*0*(\d+)$/i);
+        const normalized = digitMatch
+          ? `T-${parseInt(digitMatch[1], 10).toString().padStart(2, '0')}`
+          : raw.toUpperCase();
+        set({ tableId: normalized });
       },
       getFormattedTable: () => {
         const tableId = get().tableId;
@@ -375,6 +378,19 @@ export const useMenuStore = create<MenuState>()(
           isWaiterOpen: false,
         }));
 
+        // Fire background dispatch to backend API
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+        fetch(`${API_BASE}/service-request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tableId,
+            type: 'call_waiter',
+            reason,
+            customNote,
+          }),
+        }).catch((err) => console.warn('Call waiter dispatch note:', err));
+
         // Exact requirement toast
         toast.success('Server notified, someone will be with you shortly', {
           description: `Dispatched to ${formatted} (anti-spam cooldown: 2 mins)`,
@@ -399,6 +415,19 @@ export const useMenuStore = create<MenuState>()(
           isBillRequested: true,
           isBillOpen: false,
         }));
+
+        // Fire background dispatch to backend API
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+        fetch(`${API_BASE}/service-request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tableId,
+            type: 'bill_request',
+            paymentMethod,
+            customNote,
+          }),
+        }).catch((err) => console.warn('Request bill dispatch note:', err));
 
         toast.success(`POS alerted: Bill requested for ${formatted}.`, {
           description: 'A server will bring your invoice and machine shortly.',
