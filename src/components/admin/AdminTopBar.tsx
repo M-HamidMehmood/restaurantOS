@@ -12,8 +12,11 @@ import {
   RefreshCw,
   Flame,
   CheckCircle2,
+  ShieldCheck,
+  Shield,
 } from 'lucide-react';
 import { playOrderChime } from '@/lib/sound';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 interface AdminTopBarProps {
   isOnline: boolean;
@@ -40,6 +43,7 @@ export function AdminTopBar({
   onRefresh,
   isLoading,
 }: AdminTopBarProps) {
+  const { user, isSuperAdmin } = useAdminAuth();
   const isWsConnected = connectionStatus === 'connected';
 
   return (
@@ -154,6 +158,26 @@ export function AdminTopBar({
           <Power className="w-3.5 h-3.5 stroke-[3]" />
           <span>{isOnline ? 'Online (Accepting Orders)' : 'Kitchen Paused (Offline)'}</span>
         </button>
+
+        {/* User Role Badge */}
+        {user && (
+          <div className="hidden sm:flex items-center gap-1.5 pl-2 border-l border-stone-200">
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border ${
+                isSuperAdmin
+                  ? 'bg-amber-50 text-amber-900 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              }`}
+            >
+              {isSuperAdmin ? (
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+              ) : (
+                <Shield className="w-3.5 h-3.5 text-emerald-600" />
+              )}
+              <span>{isSuperAdmin ? 'Super Admin' : 'Admin'}</span>
+            </span>
+          </div>
+        )}
       </div>
     </header>
   );

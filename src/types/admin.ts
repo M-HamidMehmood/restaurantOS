@@ -182,4 +182,14 @@ export interface MenuCatalogStats {
   categoriesCount: number;
 }
 
+export type AdminRole = 'super_admin' | 'admin';
+
+export interface AdminUserProfile {
+  id: string;
+  email: string;
+  role: AdminRole;
+  fullName: string;
+}
+
+
 

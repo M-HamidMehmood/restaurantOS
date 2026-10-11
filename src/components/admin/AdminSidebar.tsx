@@ -11,8 +11,13 @@ import {
   Flame,
   ChevronRight,
   ShieldCheck,
+  Shield,
   Store,
+  Lock,
+  LogOut,
+  User,
 } from 'lucide-react';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 interface AdminSidebarProps {
   activeOrdersCount?: number;
@@ -20,6 +25,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const { user, role, isSuperAdmin, signOut } = useAdminAuth();
 
   const navLinks = [
     {
@@ -29,24 +35,28 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
       badge: activeOrdersCount > 0 ? activeOrdersCount : undefined,
       badgeColor: 'bg-amber-500 text-stone-950',
       description: 'Kitchen stream & tickets',
+      superAdminOnly: false,
     },
     {
       label: 'Floor & Billing',
       href: '/admin/floor',
       icon: LayoutGrid,
       description: 'Tables, POS & checkout',
+      superAdminOnly: false,
     },
     {
       label: 'Menu Manager',
       href: '/admin/menu',
       icon: UtensilsCrossed,
       description: 'Daily 86-stock & catalog',
+      superAdminOnly: true,
     },
     {
       label: 'Table QR Setup',
       href: '/admin/tables',
       icon: QrCode,
       description: 'QR provisioning & slugs',
+      superAdminOnly: true,
     },
   ];
 
@@ -71,9 +81,46 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
           </div>
         </div>
 
+        {/* User Role Card */}
+        {user && (
+          <div className="mx-3 mt-3 p-3 rounded-2xl bg-stone-950/60 border border-stone-800/80 flex items-center justify-between">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <div
+                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 font-bold text-xs ${
+                  isSuperAdmin
+                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                }`}
+              >
+                {isSuperAdmin ? (
+                  <ShieldCheck className="w-4 h-4" />
+                ) : (
+                  <Shield className="w-4 h-4" />
+                )}
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-xs font-bold text-white truncate leading-tight">
+                  {user.fullName}
+                </p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span
+                    className={`inline-block text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-md ${
+                      isSuperAdmin
+                        ? 'bg-amber-500 text-stone-950'
+                        : 'bg-emerald-500/20 text-emerald-300'
+                    }`}
+                  >
+                    {isSuperAdmin ? 'Super Admin' : 'Admin'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Navigation Section */}
         <nav className="p-3 space-y-1">
-          <p className="px-3 pt-3 pb-1.5 text-[10px] font-black uppercase tracking-wider text-stone-300">
+          <p className="px-3 pt-3 pb-1.5 text-[10px] font-black uppercase tracking-wider text-stone-400">
             Operations Console
           </p>
 
@@ -82,6 +129,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
               pathname === item.href ||
               (item.href === '/admin' && (pathname === '/admin' || pathname === '/admin/live'));
 
+            const isLocked = item.superAdminOnly && !isSuperAdmin;
             const Icon = item.icon;
 
             return (
@@ -91,34 +139,55 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-xs transition-all ${
                   isActive
                     ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                    : isLocked
+                    ? 'text-stone-500 hover:text-stone-300 hover:bg-stone-800/40 opacity-70'
                     : 'text-stone-300 hover:text-white hover:bg-stone-800/70'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
                     className={`w-4 h-4 ${
-                      isActive ? 'text-stone-950 stroke-[2.5]' : 'text-stone-400'
+                      isActive
+                        ? 'text-stone-950 stroke-[2.5]'
+                        : isLocked
+                        ? 'text-stone-600'
+                        : 'text-stone-400'
                     }`}
                   />
                   <div>
-                    <span className="block leading-none">{item.label}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="block leading-none">{item.label}</span>
+                      {isLocked && <Lock className="w-3 h-3 text-amber-500/80" />}
+                    </div>
                     <span
                       className={`text-[10px] mt-0.5 block leading-none ${
-                        isActive ? 'text-stone-900 font-medium' : 'text-stone-300'
+                        isActive
+                          ? 'text-stone-900 font-medium'
+                          : isLocked
+                          ? 'text-stone-500'
+                          : 'text-stone-400'
                       }`}
                     >
-                      {item.description}
+                      {isLocked ? 'Super Admin only' : item.description}
                     </span>
                   </div>
                 </div>
 
-                {item.badge !== undefined && (
+                {item.badge !== undefined && !isLocked && (
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-tight ${
-                      isActive ? 'bg-stone-950 text-amber-300' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      isActive
+                        ? 'bg-stone-950 text-amber-300'
+                        : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                     }`}
                   >
                     {item.badge}
+                  </span>
+                )}
+
+                {isLocked && (
+                  <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-stone-800 text-stone-400 border border-stone-700/50">
+                    Locked
                   </span>
                 )}
               </Link>
@@ -127,7 +196,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
         </nav>
       </div>
 
-      {/* Footer Info & Quick Link to QR Customer App */}
+      {/* Footer Info, Sign Out & Quick Link to QR Customer App */}
       <div className="p-4 border-t border-stone-800/80 space-y-3">
         <Link
           href="/"
@@ -141,12 +210,22 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
           <ChevronRight className="w-3.5 h-3.5 text-stone-300" />
         </Link>
 
-        <div className="flex items-center justify-between text-[11px] text-stone-300 px-1 font-medium">
+        {user && (
+          <button
+            onClick={signOut}
+            className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 text-xs font-bold transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out ({user.email})</span>
+          </button>
+        )}
+
+        <div className="flex items-center justify-between text-[11px] text-stone-400 px-1 font-medium">
           <span className="flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             Fastify + Supabase
           </span>
-          <span>v1.2</span>
+          <span>RBAC v1.2</span>
         </div>
       </div>
     </aside>
