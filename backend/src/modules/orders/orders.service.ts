@@ -172,25 +172,73 @@ export class OrdersService {
       });
     }
 
-    // 4. Generate Readable Order ID
-    const randomTicketSeq = Math.floor(1000 + Math.random() * 9000);
-    const orderId = `ORD-${randomTicketSeq}`;
+    // 4. Generate Guaranteed Unique Readable Order ID (ORD-XXXX)
+    let orderId = '';
+    let isUnique = false;
+    let attempts = 0;
+
+    while (!isUnique && attempts < 10) {
+      attempts++;
+      // First 3 attempts: random 4-digit ticket (1000 - 9999)
+      // Subsequent attempts: include time-slice entropy to guarantee uniqueness
+      const ticketSeq =
+        attempts <= 3
+          ? Math.floor(1000 + Math.random() * 9000)
+          : `${Math.floor(100 + Math.random() * 900)}${Date.now().toString().slice(-3)}`;
+      const candidateId = `ORD-${ticketSeq}`;
+
+      const existing = await this.databaseService.db.query.orders.findFirst({
+        where: eq(orders.id, candidateId),
+        columns: { id: true },
+      });
+
+      if (!existing) {
+        orderId = candidateId;
+        isUnique = true;
+      }
+    }
+
+    if (!orderId) {
+      orderId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(10 + Math.random() * 90)}`;
+    }
     const initialMinutes = 12;
 
     // 5. Persist Order and Order Items (Modifiers saved as JSONB)
-    await this.databaseService.db.insert(orders).values({
-      id: orderId,
-      tableId: table.id,
-      tableNumber: table.tableNumber,
-      status: 'pending',
-      paymentStatus: 'unpaid',
-      totalAmount: calculatedGrandTotal,
-      subtotal: calculatedSubtotal,
-      serviceCharge: calculatedServiceCharge,
-      tax: calculatedTax,
-      notes: dto.notes,
-      estimatedMinutes: initialMinutes,
-    });
+    try {
+      await this.databaseService.db.insert(orders).values({
+        id: orderId,
+        tableId: table.id,
+        tableNumber: table.tableNumber,
+        status: 'pending',
+        paymentStatus: 'unpaid',
+        totalAmount: calculatedGrandTotal,
+        subtotal: calculatedSubtotal,
+        serviceCharge: calculatedServiceCharge,
+        tax: calculatedTax,
+        notes: dto.notes,
+        estimatedMinutes: initialMinutes,
+      });
+    } catch (insertErr: any) {
+      // If a rare concurrent race condition occurs on primary key, fallback with timestamp ID
+      if (insertErr?.code === '23505' || String(insertErr?.message).includes('orders_pkey')) {
+        orderId = `ORD-${Date.now().toString().slice(-5)}${Math.floor(10 + Math.random() * 90)}`;
+        await this.databaseService.db.insert(orders).values({
+          id: orderId,
+          tableId: table.id,
+          tableNumber: table.tableNumber,
+          status: 'pending',
+          paymentStatus: 'unpaid',
+          totalAmount: calculatedGrandTotal,
+          subtotal: calculatedSubtotal,
+          serviceCharge: calculatedServiceCharge,
+          tax: calculatedTax,
+          notes: dto.notes,
+          estimatedMinutes: initialMinutes,
+        });
+      } else {
+        throw insertErr;
+      }
+    }
 
     for (const vItem of validatedItems) {
       const orderItemId = `oi-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
