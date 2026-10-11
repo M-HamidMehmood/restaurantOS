@@ -28,8 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased bg-stone-50 text-stone-900 min-h-screen">
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className="antialiased bg-stone-50 text-stone-900 min-h-screen"
+        suppressHydrationWarning
+      >
         <QueryProvider>
           {children}
           <Toaster richColors position="top-center" closeButton duration={4000} visibleToasts={3} />
