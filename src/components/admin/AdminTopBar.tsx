@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Wifi,
   WifiOff,
   Power,
   Volume2,
   VolumeX,
+  BellRing,
   Kanban,
   List,
   RefreshCw,
@@ -15,7 +16,7 @@ import {
   ShieldCheck,
   Shield,
 } from 'lucide-react';
-import { playOrderChime } from '@/lib/sound';
+import { playOrderChime, stopContinuousAlert, subscribeToAlertState } from '@/lib/sound';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 
 interface AdminTopBarProps {
@@ -45,6 +46,16 @@ export function AdminTopBar({
 }: AdminTopBarProps) {
   const { user, isSuperAdmin } = useAdminAuth();
   const isWsConnected = connectionStatus === 'connected';
+
+  const [isAlertRinging, setIsAlertRinging] = useState(false);
+  const [alertRemainingSec, setAlertRemainingSec] = useState(0);
+
+  useEffect(() => {
+    return subscribeToAlertState((ringing, remainingSec) => {
+      setIsAlertRinging(ringing);
+      setAlertRemainingSec(remainingSec);
+    });
+  }, []);
 
   return (
     <header className="no-print bg-white border-b border-stone-200 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 shadow-2xs">
@@ -96,6 +107,18 @@ export function AdminTopBar({
 
       {/* Right: Sound Alert, WebSocket Status, and Online/Offline Toggle */}
       <div className="flex items-center gap-3">
+        {/* Continuous Ringing Alarm Indicator & Silence Button */}
+        {isAlertRinging && (
+          <button
+            onClick={() => stopContinuousAlert()}
+            title="Continuous alert is ringing for portal attention. Click to silence."
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black animate-pulse shadow-md transition-all active:scale-95"
+          >
+            <BellRing className="w-3.5 h-3.5 animate-bounce" />
+            <span>Silence Sound ({alertRemainingSec}s)</span>
+          </button>
+        )}
+
         {/* Sound Chime Toggle & Test */}
         <div className="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-xl px-2 py-1">
           <button
@@ -110,7 +133,7 @@ export function AdminTopBar({
             )}
           </button>
           <button
-            onClick={() => playOrderChime()}
+            onClick={() => playOrderChime(true)}
             title="Test Chime Sound"
             className="text-[10px] font-bold text-stone-500 hover:text-stone-900 px-1 border-l border-stone-200"
           >

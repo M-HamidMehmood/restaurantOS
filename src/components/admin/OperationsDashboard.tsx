@@ -91,8 +91,10 @@ export function OperationsDashboard() {
       if (res.ok) {
         const data = await res.json().catch(() => null);
         const orderId = data?.data?.orderId || data?.orderId || '';
-        toast.success(`Dispatched simulated order ${orderId ? `#${orderId} ` : ''}for Table ${chosenTable}! Live stream received.`);
-        await refreshOrders();
+        toast.success(
+          `Dispatched simulated order ${orderId ? `#${orderId} ` : ''}for Table ${chosenTable}! Live stream received.`,
+          { id: `sim-order-${chosenTable}` }
+        );
       } else {
         const errorData = await res.json().catch(() => null);
         toast.error(errorData?.message || `Failed to dispatch order for Table ${chosenTable}`);

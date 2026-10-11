@@ -3,7 +3,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { AdminOrder, KitchenOrderStatus, WaiterCallAlert, StaffStreamEvent } from '@/types/admin';
-import { playOrderChime, playWaiterAlert, playReadyChime, getSoundMuted, setSoundMuted } from '@/lib/sound';
+import {
+  playOrderChime,
+  playWaiterAlert,
+  playReadyChime,
+  getSoundMuted,
+  setSoundMuted,
+  startContinuousAlert,
+  stopContinuousAlert,
+  isContinuousAlertActive,
+} from '@/lib/sound';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
@@ -58,6 +67,15 @@ export function useAdminOperations() {
     }
   }, []);
 
+  // Automatically stop continuous alarm when all pending orders and service calls are handled
+  useEffect(() => {
+    const hasPendingOrders = orders.some((o) => o.status === 'pending');
+    const hasActiveCalls = waiterCalls.length > 0;
+    if (!hasPendingOrders && !hasActiveCalls && isContinuousAlertActive()) {
+      stopContinuousAlert();
+    }
+  }, [orders, waiterCalls]);
+
   const toggleOnline = useCallback(() => {
     setIsOnline((prev) => {
       const next = !prev;
@@ -76,9 +94,10 @@ export function useAdminOperations() {
       const next = !prev;
       setSoundMuted(next);
       if (!next) {
-        playOrderChime();
+        playOrderChime(true);
         toast.info('Audio chimes enabled');
       } else {
+        stopContinuousAlert();
         toast.info('Audio alerts muted');
       }
       return next;
@@ -145,11 +164,6 @@ export function useAdminOperations() {
         return;
       }
 
-      // Check if already in list
-      if (ordersRef.current.some((o) => o.id === orderId)) {
-        return;
-      }
-
       const newOrder: AdminOrder = {
         id: orderId,
         tableId: rawOrder.tableId || '',
@@ -190,14 +204,18 @@ export function useAdminOperations() {
         return [newOrder, ...prev];
       });
 
-      // Audible chime
-      playOrderChime();
+      // Start continuous repeating chime alert (loops for 3 minutes without stopping until staff acknowledges)
+      startContinuousAlert('order');
 
       // Alert toast with unique id to prevent double rendering in Sonner
       toast.info(`🔔 New Order #${orderId} from Table ${newOrder.tableNumber}`, {
         id: `order-new-${orderId}`,
         description: `${newOrder.items.length} item(s) • Total: Rs. ${newOrder.totalAmount}`,
-        duration: 6000,
+        duration: 10000,
+        action: {
+          label: 'Silence Sound',
+          onClick: () => stopContinuousAlert(),
+        },
       });
     },
     [isDuplicateEvent]
@@ -231,12 +249,17 @@ export function useAdminOperations() {
         ];
       });
 
-      playWaiterAlert();
+      // Start continuous repeating chime alert for staff attention
+      startContinuousAlert('waiter');
 
       toast.warning(`🙋 [${tableNum}] Assistance Requested!`, {
         id: `waiter-call-${callId}`,
         description: `Reason: ${payload.reason || 'General Assistance'} ${payload.customNote ? `• "${payload.customNote}"` : ''}`,
-        duration: 8000,
+        duration: 10000,
+        action: {
+          label: 'Silence Sound',
+          onClick: () => stopContinuousAlert(),
+        },
       });
     },
     [isDuplicateEvent]
@@ -270,12 +293,17 @@ export function useAdminOperations() {
         ];
       });
 
-      playWaiterAlert();
+      // Start continuous repeating chime alert for cashier/server attention
+      startContinuousAlert('bill');
 
       toast.info(`💳 [${tableNum}] Bill Settlement Requested`, {
         id: `bill-req-${callId}`,
         description: `Payment: ${(payload.paymentMethod || 'cash').toUpperCase()} • Total: Rs. ${payload.tableTotal || ''}`,
-        duration: 8000,
+        duration: 10000,
+        action: {
+          label: 'Silence Sound',
+          onClick: () => stopContinuousAlert(),
+        },
       });
     },
     [isDuplicateEvent]
@@ -403,6 +431,13 @@ export function useAdminOperations() {
   // 1. Accept Order (Pending -> In Kitchen / Preparing)
   const acceptOrder = async (orderId: string) => {
     isDuplicateEvent(`status:${orderId}:preparing`);
+
+    // Stop continuous chime if all pending orders & waiter calls are handled
+    const otherPending = orders.filter((o) => o.status === 'pending' && o.id !== orderId);
+    if (otherPending.length === 0 && waiterCalls.length === 0) {
+      stopContinuousAlert();
+    }
+
     // Optimistic update
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: 'preparing' as KitchenOrderStatus } : o))
@@ -436,6 +471,13 @@ export function useAdminOperations() {
   // 2. Reject Order (Pending -> Cancelled with Reason)
   const rejectOrder = async (orderId: string, reason: string) => {
     isDuplicateEvent(`status:${orderId}:cancelled`);
+
+    // Stop continuous chime if all pending orders & waiter calls are handled
+    const otherPending = orders.filter((o) => o.status === 'pending' && o.id !== orderId);
+    if (otherPending.length === 0 && waiterCalls.length === 0) {
+      stopContinuousAlert();
+    }
+
     // Optimistic update
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: 'cancelled' as KitchenOrderStatus } : o))
@@ -536,6 +578,13 @@ export function useAdminOperations() {
     isDuplicateEvent(`waiter-handled:${callId}`);
     setWaiterCalls((prev) => prev.filter((c) => c.id !== callId));
 
+    // Stop continuous chime if all pending orders & waiter calls are handled
+    const otherCalls = waiterCalls.filter((c) => c.id !== callId);
+    const otherPending = orders.filter((o) => o.status === 'pending');
+    if (otherCalls.length === 0 && otherPending.length === 0) {
+      stopContinuousAlert();
+    }
+
     try {
       await fetch(`${API_BASE}/admin/service-requests/${callId}/resolve`, {
         method: 'PATCH',
@@ -572,6 +621,7 @@ export function useAdminOperations() {
     markReady,
     markServed,
     dismissWaiterCall,
+    stopAlert: stopContinuousAlert,
     refreshOrders: fetchOrders,
   };
 }

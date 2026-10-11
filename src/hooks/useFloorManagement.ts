@@ -16,6 +16,7 @@ import {
   playOrderChime,
   playWaiterAlert,
   playSettlementChime,
+  stopContinuousAlert,
 } from '@/lib/sound';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 
@@ -344,6 +345,7 @@ export function useFloorManagement() {
           method: 'PATCH',
         });
         if (res.ok) {
+          stopContinuousAlert();
           toast.success(`Waiter call for ${tableNumber || 'Table'} resolved`);
           setTables((prev) =>
             prev.map((t) =>
@@ -381,6 +383,7 @@ export function useFloorManagement() {
         });
 
         if (res.ok) {
+          stopContinuousAlert();
           isDuplicateEvent(`floor:settle:${settlement.tableNumber}`);
           isDuplicateEvent(`floor:settle:${settlement.tableId}`);
           playSettlementChime();
