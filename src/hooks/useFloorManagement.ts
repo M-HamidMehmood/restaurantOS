@@ -32,6 +32,24 @@ export function useFloorManagement() {
   const tablesRef = useRef<FloorTable[]>([]);
   tablesRef.current = tables;
 
+  // In-memory ref to deduplicate events within 5 seconds
+  const processedEventsRef = useRef<Map<string, number>>(new Map());
+
+  const isDuplicateEvent = useCallback((key: string): boolean => {
+    const now = Date.now();
+    const lastTime = processedEventsRef.current.get(key);
+    if (lastTime && now - lastTime < 5000) {
+      return true;
+    }
+    processedEventsRef.current.set(key, now);
+    if (processedEventsRef.current.size > 100) {
+      for (const [k, t] of processedEventsRef.current.entries()) {
+        if (now - t > 30000) processedEventsRef.current.delete(k);
+      }
+    }
+    return false;
+  }, []);
+
   // Normalized helper to compare table numbers e.g. "T-01" vs "T-1" vs "table-1"
   const normalizeTableNo = (numOrSlug?: string): string => {
     if (!numOrSlug) return '';
@@ -203,33 +221,49 @@ export function useFloorManagement() {
         realtimeChannel
           .on('broadcast', { event: 'order:new' }, (payload: any) => {
             const data = payload.payload || payload.data;
-            playOrderChime();
-            toast.info(`New round ordered for Table ${data.tableNumber || data.tableId}!`, {
-              icon: '🍲',
-            });
+            const orderId = data.orderId || data.id || `order-${data.tableNumber || data.tableId}`;
+            if (!isDuplicateEvent(`floor:order:${orderId}`)) {
+              playOrderChime();
+              toast.info(`New round ordered for Table ${data.tableNumber || data.tableId}!`, {
+                id: `floor-order-${orderId}`,
+                icon: '🍲',
+              });
+            }
             fetchFloorData();
           })
           .on('broadcast', { event: 'service:call_waiter' }, (payload: any) => {
             const data = payload.payload || payload.data;
-            playWaiterAlert();
-            toast.warning(`Table ${data.tableNumber || data.tableId} called waiter!`, {
-              icon: '🔔',
-            });
+            const callId = data.requestId || data.id || `waiter-${data.tableNumber || data.tableId}`;
+            if (!isDuplicateEvent(`floor:waiter:${callId}`)) {
+              playWaiterAlert();
+              toast.warning(`Table ${data.tableNumber || data.tableId} called waiter!`, {
+                id: `floor-waiter-${callId}`,
+                icon: '🔔',
+              });
+            }
             fetchFloorData();
           })
           .on('broadcast', { event: 'service:bill_request' }, (payload: any) => {
             const data = payload.payload || payload.data;
-            playOrderChime();
-            toast.info(`Table ${data.tableNumber || data.tableId} requested bill settlement!`, {
-              icon: '🧾',
-            });
+            const billId = data.requestId || data.id || `bill-${data.tableNumber || data.tableId}`;
+            if (!isDuplicateEvent(`floor:bill:${billId}`)) {
+              playOrderChime();
+              toast.info(`Table ${data.tableNumber || data.tableId} requested bill settlement!`, {
+                id: `floor-bill-${billId}`,
+                icon: '🧾',
+              });
+            }
             fetchFloorData();
           })
           .on('broadcast', { event: 'table:settled' }, (payload: any) => {
             const data = payload.payload || payload.data;
-            toast.success(`Table ${data.tableNumber} bill settled successfully!`, {
-              icon: '✅',
-            });
+            const tableNum = data.tableNumber || data.tableId;
+            if (!isDuplicateEvent(`floor:settle:${tableNum}`)) {
+              toast.success(`Table ${tableNum} bill settled successfully!`, {
+                id: `floor-settle-${tableNum}`,
+                icon: '✅',
+              });
+            }
             fetchFloorData();
           })
           .subscribe((status: string) => {
@@ -253,17 +287,14 @@ export function useFloorManagement() {
       };
 
       sseSource.addEventListener('order:new', () => {
-        playOrderChime();
         fetchFloorData();
       });
 
       sseSource.addEventListener('service:call_waiter', () => {
-        playWaiterAlert();
         fetchFloorData();
       });
 
       sseSource.addEventListener('service:bill_request', () => {
-        playOrderChime();
         fetchFloorData();
       });
 
@@ -350,10 +381,12 @@ export function useFloorManagement() {
         });
 
         if (res.ok) {
+          isDuplicateEvent(`floor:settle:${settlement.tableNumber}`);
+          isDuplicateEvent(`floor:settle:${settlement.tableId}`);
           playSettlementChime();
           toast.success(
             `Table ${settlement.tableNumber} bill settled: Rs. ${settlement.finalTotal.toLocaleString()} (${settlement.paymentMethod.toUpperCase()})`,
-            { icon: '🧾' }
+            { id: `floor-settle-${settlement.tableNumber}`, icon: '🧾' }
           );
 
           // Optimistically reset table to available in local state
@@ -386,16 +419,20 @@ export function useFloorManagement() {
           return true;
         } else {
           const errData = await res.json().catch(() => ({}));
-          toast.error(errData.message || 'Settlement failed. Please try again.');
+          toast.error(errData.message || 'Settlement failed. Please try again.', {
+            id: `floor-error-${settlement.tableNumber}`,
+          });
           return false;
         }
       } catch (err) {
         console.error('Error settling table:', err);
-        toast.error('Connection error while settling table.');
+        toast.error('Connection error while settling table.', {
+          id: `floor-error-${settlement.tableNumber}`,
+        });
         return false;
       }
     },
-    [fetchFloorData]
+    [fetchFloorData, isDuplicateEvent]
   );
 
   return {

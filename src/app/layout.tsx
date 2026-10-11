@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className="antialiased bg-stone-50 text-stone-900 min-h-screen">
         <QueryProvider>
           {children}
-          <Toaster richColors position="top-center" />
+          <Toaster richColors position="top-center" closeButton duration={4000} visibleToasts={3} />
         </QueryProvider>
       </body>
     </html>

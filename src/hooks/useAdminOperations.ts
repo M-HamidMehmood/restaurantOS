@@ -22,6 +22,25 @@ export function useAdminOperations() {
   const ordersRef = useRef<AdminOrder[]>([]);
   ordersRef.current = orders;
 
+  // In-memory ref to deduplicate events between Supabase Realtime & SSE Stream within 5 seconds
+  const processedEventsRef = useRef<Map<string, number>>(new Map());
+
+  const isDuplicateEvent = useCallback((key: string): boolean => {
+    const now = Date.now();
+    const lastTime = processedEventsRef.current.get(key);
+    if (lastTime && now - lastTime < 5000) {
+      return true;
+    }
+    processedEventsRef.current.set(key, now);
+    // Clean up stale keys
+    if (processedEventsRef.current.size > 100) {
+      for (const [k, t] of processedEventsRef.current.entries()) {
+        if (now - t > 30000) processedEventsRef.current.delete(k);
+      }
+    }
+    return false;
+  }, []);
+
   // Initialize preferences from localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -116,141 +135,179 @@ export function useAdminOperations() {
   }, []);
 
   // Handle incoming new order event
-  const handleIncomingOrder = useCallback((rawOrder: any) => {
-    const orderId = rawOrder.orderId || rawOrder.id;
-    if (!orderId) return;
+  const handleIncomingOrder = useCallback(
+    (rawOrder: any) => {
+      const orderId = rawOrder.orderId || rawOrder.id;
+      if (!orderId) return;
 
-    // Check if already in list
-    if (ordersRef.current.some((o) => o.id === orderId)) {
-      return;
-    }
+      // Deduplicate identical events arriving within 5 seconds (Supabase Realtime + SSE)
+      if (isDuplicateEvent(`order:new:${orderId}`)) {
+        return;
+      }
 
-    const newOrder: AdminOrder = {
-      id: orderId,
-      tableId: rawOrder.tableId || '',
-      tableNumber: rawOrder.tableNumber || 'Takeaway',
-      status: (rawOrder.status as KitchenOrderStatus) || 'pending',
-      paymentStatus: rawOrder.paymentStatus || 'unpaid',
-      paymentMethod: rawOrder.paymentMethod || null,
-      subtotal: rawOrder.subtotal || rawOrder.totalAmount || 0,
-      serviceCharge: rawOrder.serviceCharge || 0,
-      tax: rawOrder.tax || 0,
-      totalAmount: rawOrder.totalAmount || 0,
-      estimatedMinutes: rawOrder.estimatedMinutes || 12,
-      notes: rawOrder.notes || '',
-      createdAt: rawOrder.createdAt || new Date().toISOString(),
-      items: (rawOrder.items || []).map((it: any, idx: number) => ({
-        id: it.id || `it-${idx}`,
-        menuItemId: it.menuItemId,
-        name: it.name || it.item?.name || 'Dish Item',
-        quantity: it.quantity || 1,
-        unitPrice: it.unitPrice || 0,
-        totalPrice: it.totalPrice || (it.unitPrice || 0) * (it.quantity || 1),
-        selectedModifiers: it.selectedModifiers || it.modifiers || [],
-        notes: it.notes,
-      })),
-      statusHistory: [
-        {
-          id: `log-${Date.now()}`,
-          orderId,
-          status: 'pending',
-          message: 'Order created via QR menu and received in kitchen',
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    };
+      // Check if already in list
+      if (ordersRef.current.some((o) => o.id === orderId)) {
+        return;
+      }
 
-    setOrders((prev) => [newOrder, ...prev]);
+      const newOrder: AdminOrder = {
+        id: orderId,
+        tableId: rawOrder.tableId || '',
+        tableNumber: rawOrder.tableNumber || 'Takeaway',
+        status: (rawOrder.status as KitchenOrderStatus) || 'pending',
+        paymentStatus: rawOrder.paymentStatus || 'unpaid',
+        paymentMethod: rawOrder.paymentMethod || null,
+        subtotal: rawOrder.subtotal || rawOrder.totalAmount || 0,
+        serviceCharge: rawOrder.serviceCharge || 0,
+        tax: rawOrder.tax || 0,
+        totalAmount: rawOrder.totalAmount || 0,
+        estimatedMinutes: rawOrder.estimatedMinutes || 12,
+        notes: rawOrder.notes || '',
+        createdAt: rawOrder.createdAt || new Date().toISOString(),
+        items: (rawOrder.items || []).map((it: any, idx: number) => ({
+          id: it.id || `it-${idx}`,
+          menuItemId: it.menuItemId,
+          name: it.name || it.item?.name || 'Dish Item',
+          quantity: it.quantity || 1,
+          unitPrice: it.unitPrice || 0,
+          totalPrice: it.totalPrice || (it.unitPrice || 0) * (it.quantity || 1),
+          selectedModifiers: it.selectedModifiers || it.modifiers || [],
+          notes: it.notes,
+        })),
+        statusHistory: [
+          {
+            id: `log-${Date.now()}`,
+            orderId,
+            status: 'pending',
+            message: 'Order created via QR menu and received in kitchen',
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      };
 
-    // Audible chime
-    playOrderChime();
+      setOrders((prev) => {
+        if (prev.some((o) => o.id === orderId)) return prev;
+        return [newOrder, ...prev];
+      });
 
-    // Alert toast
-    toast.info(`🔔 New Order #${orderId} from Table ${newOrder.tableNumber}`, {
-      description: `${newOrder.items.length} item(s) • Total: Rs. ${newOrder.totalAmount}`,
-      duration: 6000,
-    });
-  }, []);
+      // Audible chime
+      playOrderChime();
+
+      // Alert toast with unique id to prevent double rendering in Sonner
+      toast.info(`🔔 New Order #${orderId} from Table ${newOrder.tableNumber}`, {
+        id: `order-new-${orderId}`,
+        description: `${newOrder.items.length} item(s) • Total: Rs. ${newOrder.totalAmount}`,
+        duration: 6000,
+      });
+    },
+    [isDuplicateEvent]
+  );
 
   // Handle incoming waiter assistance event
-  const handleIncomingWaiterCall = useCallback((payload: any) => {
-    const callId = payload.requestId || payload.id || `sr-${Date.now()}`;
-    const tableNum = payload.tableNumber || `Table ${payload.tableId?.substring(0, 4) || '??'}`;
+  const handleIncomingWaiterCall = useCallback(
+    (payload: any) => {
+      const callId =
+        payload.requestId ||
+        payload.id ||
+        `sr-${payload.tableId || 'call'}-${Math.floor(Date.now() / 5000)}`;
+      const tableNum = payload.tableNumber || `Table ${payload.tableId?.substring(0, 4) || '??'}`;
 
-    setWaiterCalls((prev) => {
-      if (prev.some((c) => c.id === callId)) return prev;
-      return [
-        {
-          id: callId,
-          tableId: payload.tableId,
-          tableNumber: tableNum,
-          type: 'call_waiter',
-          reason: payload.reason || 'General Assistance',
-          customNote: payload.customNote,
-          status: 'pending',
-          createdAt: payload.timestamp || new Date().toISOString(),
-        },
-        ...prev,
-      ];
-    });
+      if (isDuplicateEvent(`waiter:${callId}`)) return;
 
-    playWaiterAlert();
+      setWaiterCalls((prev) => {
+        if (prev.some((c) => c.id === callId)) return prev;
+        return [
+          {
+            id: callId,
+            tableId: payload.tableId,
+            tableNumber: tableNum,
+            type: 'call_waiter',
+            reason: payload.reason || 'General Assistance',
+            customNote: payload.customNote,
+            status: 'pending',
+            createdAt: payload.timestamp || new Date().toISOString(),
+          },
+          ...prev,
+        ];
+      });
 
-    toast.warning(`🙋 [${tableNum}] Assistance Requested!`, {
-      description: `Reason: ${payload.reason || 'General Assistance'} ${payload.customNote ? `• "${payload.customNote}"` : ''}`,
-      duration: 8000,
-    });
-  }, []);
+      playWaiterAlert();
+
+      toast.warning(`🙋 [${tableNum}] Assistance Requested!`, {
+        id: `waiter-call-${callId}`,
+        description: `Reason: ${payload.reason || 'General Assistance'} ${payload.customNote ? `• "${payload.customNote}"` : ''}`,
+        duration: 8000,
+      });
+    },
+    [isDuplicateEvent]
+  );
 
   // Handle incoming bill request event
-  const handleIncomingBillRequest = useCallback((payload: any) => {
-    const callId = payload.requestId || payload.id || `sr-${Date.now()}`;
-    const tableNum = payload.tableNumber || `Table ${payload.tableId?.substring(0, 4) || '??'}`;
+  const handleIncomingBillRequest = useCallback(
+    (payload: any) => {
+      const callId =
+        payload.requestId ||
+        payload.id ||
+        `bill-${payload.tableId || 'call'}-${Math.floor(Date.now() / 5000)}`;
+      const tableNum = payload.tableNumber || `Table ${payload.tableId?.substring(0, 4) || '??'}`;
 
-    setWaiterCalls((prev) => {
-      if (prev.some((c) => c.id === callId)) return prev;
-      return [
-        {
-          id: callId,
-          tableId: payload.tableId,
-          tableNumber: tableNum,
-          type: 'bill_request',
-          paymentMethod: payload.paymentMethod || 'cash',
-          customNote: payload.customNote,
-          status: 'pending',
-          createdAt: payload.timestamp || new Date().toISOString(),
-        },
-        ...prev,
-      ];
-    });
+      if (isDuplicateEvent(`bill:${callId}`)) return;
 
-    playWaiterAlert();
+      setWaiterCalls((prev) => {
+        if (prev.some((c) => c.id === callId)) return prev;
+        return [
+          {
+            id: callId,
+            tableId: payload.tableId,
+            tableNumber: tableNum,
+            type: 'bill_request',
+            paymentMethod: payload.paymentMethod || 'cash',
+            customNote: payload.customNote,
+            status: 'pending',
+            createdAt: payload.timestamp || new Date().toISOString(),
+          },
+          ...prev,
+        ];
+      });
 
-    toast.info(`💳 [${tableNum}] Bill Settlement Requested`, {
-      description: `Payment: ${(payload.paymentMethod || 'cash').toUpperCase()} • Total: Rs. ${payload.tableTotal || ''}`,
-      duration: 8000,
-    });
-  }, []);
+      playWaiterAlert();
+
+      toast.info(`💳 [${tableNum}] Bill Settlement Requested`, {
+        id: `bill-req-${callId}`,
+        description: `Payment: ${(payload.paymentMethod || 'cash').toUpperCase()} • Total: Rs. ${payload.tableTotal || ''}`,
+        duration: 8000,
+      });
+    },
+    [isDuplicateEvent]
+  );
 
   // Handle order status updated event
-  const handleOrderStatusUpdated = useCallback((payload: any) => {
-    const orderId = payload.orderId;
-    if (!orderId) return;
+  const handleOrderStatusUpdated = useCallback(
+    (payload: any) => {
+      const orderId = payload.orderId;
+      if (!orderId) return;
 
-    setOrders((prev) =>
-      prev.map((o) => {
-        if (o.id === orderId) {
-          const updated = { ...o, status: payload.status as KitchenOrderStatus };
-          if (payload.status === 'ready') {
-            playReadyChime();
-            toast.success(`🍽️ Order #${orderId} is READY to serve at Table ${o.tableNumber}!`);
+      const eventKey = `status:${orderId}:${payload.status}`;
+      const alreadyHandled = isDuplicateEvent(eventKey);
+
+      setOrders((prev) =>
+        prev.map((o) => {
+          if (o.id === orderId) {
+            const updated = { ...o, status: payload.status as KitchenOrderStatus };
+            if (payload.status === 'ready' && !alreadyHandled) {
+              playReadyChime();
+              toast.success(`🍽️ Order #${orderId} is READY to serve at Table ${o.tableNumber}!`, {
+                id: `order-ready-${orderId}`,
+              });
+            }
+            return updated;
           }
-          return updated;
-        }
-        return o;
-      })
-    );
-  }, []);
+          return o;
+        })
+      );
+    },
+    [isDuplicateEvent]
+  );
 
   // Setup Real-time connection (Supabase WebSockets + SSE fallback)
   useEffect(() => {
@@ -345,6 +402,7 @@ export function useAdminOperations() {
 
   // 1. Accept Order (Pending -> In Kitchen / Preparing)
   const acceptOrder = async (orderId: string) => {
+    isDuplicateEvent(`status:${orderId}:preparing`);
     // Optimistic update
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: 'preparing' as KitchenOrderStatus } : o))
@@ -364,15 +422,20 @@ export function useAdminOperations() {
         throw new Error('Failed to accept order on server');
       }
 
-      toast.success(`Order #${orderId} accepted and moved to In Kitchen!`);
+      toast.success(`Order #${orderId} accepted and moved to In Kitchen!`, {
+        id: `order-accept-${orderId}`,
+      });
     } catch (err) {
-      toast.error(`Could not accept order #${orderId}. Please try again.`);
+      toast.error(`Could not accept order #${orderId}. Please try again.`, {
+        id: `order-error-${orderId}`,
+      });
       fetchOrders();
     }
   };
 
   // 2. Reject Order (Pending -> Cancelled with Reason)
   const rejectOrder = async (orderId: string, reason: string) => {
+    isDuplicateEvent(`status:${orderId}:cancelled`);
     // Optimistic update
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: 'cancelled' as KitchenOrderStatus } : o))
@@ -392,15 +455,20 @@ export function useAdminOperations() {
         throw new Error('Failed to reject order on server');
       }
 
-      toast.error(`Order #${orderId} rejected: ${reason}`);
+      toast.error(`Order #${orderId} rejected: ${reason}`, {
+        id: `order-reject-${orderId}`,
+      });
     } catch (err) {
-      toast.error(`Could not reject order #${orderId}`);
+      toast.error(`Could not reject order #${orderId}`, {
+        id: `order-error-${orderId}`,
+      });
       fetchOrders();
     }
   };
 
   // 3. Mark Ready (In Kitchen -> Ready to Serve)
   const markReady = async (orderId: string) => {
+    isDuplicateEvent(`status:${orderId}:ready`);
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: 'ready' as KitchenOrderStatus } : o))
     );
@@ -420,15 +488,20 @@ export function useAdminOperations() {
       }
 
       playReadyChime();
-      toast.success(`Order #${orderId} marked READY to serve!`);
+      toast.success(`Order #${orderId} marked READY to serve!`, {
+        id: `order-ready-${orderId}`,
+      });
     } catch (err) {
-      toast.error(`Could not update order #${orderId}`);
+      toast.error(`Could not update order #${orderId}`, {
+        id: `order-error-${orderId}`,
+      });
       fetchOrders();
     }
   };
 
   // 4. Mark Delivered / Served (Ready -> Served)
   const markServed = async (orderId: string) => {
+    isDuplicateEvent(`status:${orderId}:served`);
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: 'served' as KitchenOrderStatus } : o))
     );
@@ -447,22 +520,29 @@ export function useAdminOperations() {
         throw new Error('Failed to mark served on server');
       }
 
-      toast.success(`Order #${orderId} delivered to table!`);
+      toast.success(`Order #${orderId} delivered to table!`, {
+        id: `order-served-${orderId}`,
+      });
     } catch (err) {
-      toast.error(`Could not update order #${orderId}`);
+      toast.error(`Could not update order #${orderId}`, {
+        id: `order-error-${orderId}`,
+      });
       fetchOrders();
     }
   };
 
   // 5. Dismiss / Handle Waiter Assistance Call
   const dismissWaiterCall = async (callId: string) => {
+    isDuplicateEvent(`waiter-handled:${callId}`);
     setWaiterCalls((prev) => prev.filter((c) => c.id !== callId));
 
     try {
       await fetch(`${API_BASE}/admin/service-requests/${callId}/resolve`, {
         method: 'PATCH',
       });
-      toast.success('Assistance request marked handled');
+      toast.success('Assistance request marked handled', {
+        id: `waiter-handled-${callId}`,
+      });
     } catch (err) {
       console.error('Failed to resolve service request:', err);
     }
