@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { MenuInterface } from '@/components/MenuInterface';
 import { TableInitializer } from '@/components/TableInitializer';
+import { ScanQrLanding } from '@/components/ScanQrLanding';
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -13,6 +14,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const tableParam = resolvedSearchParams.table
     ? decodeURIComponent(resolvedSearchParams.table)
     : undefined;
+
+  // Direct visit or first-time visitor without table QR parameter
+  if (!tableParam) {
+    return (
+      <Suspense fallback={<HomeLoading />}>
+        <ScanQrLanding />
+      </Suspense>
+    );
+  }
 
   return (
     <Suspense fallback={<HomeLoading />}>

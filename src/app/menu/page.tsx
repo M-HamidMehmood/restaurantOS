@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { MenuInterface } from '@/components/MenuInterface';
 import { TableInitializer } from '@/components/TableInitializer';
+import { ScanQrLanding } from '@/components/ScanQrLanding';
 
 interface MenuPageProps {
   searchParams: Promise<{
@@ -13,6 +14,14 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
   const tableParam = resolvedSearchParams.table
     ? decodeURIComponent(resolvedSearchParams.table)
     : undefined;
+
+  if (!tableParam) {
+    return (
+      <Suspense fallback={<MenuLoading />}>
+        <ScanQrLanding />
+      </Suspense>
+    );
+  }
 
   return (
     <Suspense fallback={<MenuLoading />}>

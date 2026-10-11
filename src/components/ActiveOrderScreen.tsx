@@ -154,21 +154,34 @@ export const ActiveOrderScreen: React.FC = () => {
 
   return (
     <Dialog open={isActiveOrderOpen} onOpenChange={setIsActiveOrderOpen}>
-      <DialogContent className="max-w-md w-full p-0 max-h-[92vh] flex flex-col rounded-3xl overflow-hidden border border-stone-200 shadow-2xl">
+      <DialogContent className="max-w-md w-full p-0 max-h-[94vh] sm:max-h-[92vh] flex flex-col rounded-t-3xl rounded-b-none sm:rounded-3xl overflow-hidden border border-stone-200 shadow-2xl [&>button:last-child]:hidden">
         {/* Header Bar */}
         <div className="p-4 bg-stone-900 text-white shrink-0">
+          {/* Mobile pull indicator */}
+          <div className="w-12 h-1 bg-stone-700/80 rounded-full mx-auto mb-2.5 sm:hidden" />
+
           <div className="flex items-center justify-between">
             <button
               type="button"
               onClick={() => setIsActiveOrderOpen(false)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-stone-300 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-stone-300 hover:text-white px-2 py-1 rounded-lg hover:bg-stone-800 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Menu</span>
             </button>
-            <Badge variant="amber" className="text-xs font-bold py-0.5 px-2.5">
-              {getFormattedTable()}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="amber" className="text-xs font-bold py-0.5 px-2.5">
+                {getFormattedTable()}
+              </Badge>
+              <button
+                type="button"
+                onClick={() => setIsActiveOrderOpen(false)}
+                className="w-7 h-7 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs"
+                aria-label="Close modal"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           <DialogHeader className="pt-2 text-left">
@@ -189,7 +202,7 @@ export const ActiveOrderScreen: React.FC = () => {
           {activeOrders.length > 1 && (
             <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-none">
               <span className="text-[10px] text-stone-400 uppercase tracking-wider shrink-0">
-                Orders:
+                Rounds:
               </span>
               {activeOrders.map((ord, idx) => (
                 <button
@@ -210,7 +223,7 @@ export const ActiveOrderScreen: React.FC = () => {
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           {/* Real-Time Live Status Tracker Card */}
           {currentOrder && (
             <Card className="p-4 rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/60 via-white to-stone-50 shadow-2xs space-y-4">
@@ -250,17 +263,17 @@ export const ActiveOrderScreen: React.FC = () => {
               {/* 3-Step Visual Timeline: Received -> Preparing -> Served */}
               <div className="relative pt-2 pb-1">
                 {/* Connecting background track */}
-                <div className="absolute top-6 left-6 right-6 h-1 bg-stone-200 -z-0" />
+                <div className="absolute top-5 left-8 right-8 h-1 bg-stone-200 -z-0" />
                 {/* Animated active track fill */}
                 <div
-                  className="absolute top-6 left-6 h-1 bg-amber-500 transition-all duration-700 -z-0"
+                  className="absolute top-5 left-8 h-1 bg-amber-500 transition-all duration-700 -z-0"
                   style={{
                     width:
                       currentStepIdx === 0
                         ? '0%'
                         : currentStepIdx === 1
                         ? '50%'
-                        : 'calc(100% - 48px)',
+                        : 'calc(100% - 64px)',
                   }}
                 />
 
@@ -272,10 +285,10 @@ export const ActiveOrderScreen: React.FC = () => {
                     return (
                       <div
                         key={step.status}
-                        className="flex flex-col items-center text-center max-w-[85px]"
+                        className="flex flex-col items-center text-center max-w-[90px]"
                       >
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                             isCompleted
                               ? 'bg-emerald-500 text-white shadow-xs'
                               : isCurrent
@@ -305,43 +318,59 @@ export const ActiveOrderScreen: React.FC = () => {
                 </div>
               </div>
 
+              {/* Reassuring live status message */}
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-stone-700 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                <span className="font-medium text-[11px] leading-tight">
+                  {currentOrder.status === 'served'
+                    ? 'Dishes served to your table! Enjoy your meal.'
+                    : currentOrder.status === 'preparing'
+                    ? 'Chef is actively cooking dishes on grill & stove.'
+                    : 'Kitchen confirmed order. Preparing ingredients now.'}
+                </span>
+              </div>
+
               {/* Estimated completion banner */}
-              <div className="flex items-center justify-between text-xs pt-2 border-t border-amber-100/70 text-stone-600">
+              <div className="flex items-center justify-between text-xs pt-1 border-t border-amber-100/70 text-stone-600">
                 <span className="inline-flex items-center gap-1.5 font-medium">
                   <Timer className="w-3.5 h-3.5 text-amber-600" />
                   Estimated Time:
                 </span>
                 <span className="font-bold text-stone-900">
                   {currentOrder.status === 'served'
-                    ? 'Dishes on your table'
+                    ? 'Delivered'
                     : currentOrder.status === 'preparing'
                     ? '~6-9 minutes remaining'
                     : '~10-12 minutes remaining'}
                 </span>
               </div>
 
-              {/* Demo Status Switcher (Allows testing each status instantly) */}
-              <div className="pt-2 flex items-center justify-between border-t border-stone-100">
-                <span className="text-[10px] text-stone-400 font-semibold uppercase">
-                  Simulate Status:
-                </span>
-                <div className="flex gap-1">
-                  {(['received', 'preparing', 'served'] as OrderStatus[]).map((st) => (
-                    <button
-                      key={st}
-                      type="button"
-                      onClick={() => updateOrderStatus(currentOrder.orderId, st)}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md capitalize transition-colors cursor-pointer ${
-                        currentOrder.status === st
-                          ? 'bg-stone-900 text-white'
-                          : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                      }`}
-                    >
-                      {st}
-                    </button>
-                  ))}
+              {/* Demo Status Switcher (Inside clean collapsible details so it doesn't clutter customer view) */}
+              <details className="group pt-2 border-t border-stone-100 text-left">
+                <summary className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider cursor-pointer hover:text-stone-600 flex items-center justify-between list-none">
+                  <span>Demo Simulation Controls</span>
+                  <span className="text-[10px] text-amber-600 font-bold group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div className="pt-2 flex items-center justify-between">
+                  <span className="text-[10px] text-stone-500">Fast-forward status:</span>
+                  <div className="flex gap-1">
+                    {(['received', 'preparing', 'served'] as OrderStatus[]).map((st) => (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => updateOrderStatus(currentOrder.orderId, st)}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md capitalize transition-colors cursor-pointer ${
+                          currentOrder.status === st
+                            ? 'bg-stone-900 text-white'
+                            : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                        }`}
+                      >
+                        {st}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </details>
             </Card>
           )}
 
