@@ -157,11 +157,11 @@ export function OrderTicketCard({
         {/* Dedicated Print KOT Action */}
         <button
           onClick={() => onPrintKot(order)}
-          title="Print Kitchen Order Ticket (80mm)"
+          title="Print 80mm Bill"
           className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-200/70 rounded-xl border border-stone-200 transition-colors flex items-center gap-1 text-xs font-semibold"
         >
           <Printer className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">KOT</span>
+          <span className="hidden sm:inline">Bill</span>
         </button>
 
         {/* Status Pipeline Actions */}

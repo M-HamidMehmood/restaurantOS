@@ -36,7 +36,7 @@ export function KotThermalTicket({ order, isOpen, onClose }: KotThermalTicketPro
         <div className="no-print px-5 py-3.5 bg-stone-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Printer className="w-4 h-4 text-amber-400" />
-            <span className="font-semibold text-sm tracking-wide">80mm Thermal KOT Preview</span>
+            <span className="font-semibold text-sm tracking-wide">80mm Thermal Bill Preview</span>
           </div>
           <button
             onClick={onClose}
@@ -55,52 +55,73 @@ export function KotThermalTicket({ order, isOpen, onClose }: KotThermalTicketPro
             {/* Header */}
             <div className="text-center border-b-2 border-black pb-2 mb-2">
               <p className="text-[14px] font-black uppercase tracking-wider">CHASKA & CHAI CAFE</p>
-              <p className="text-[10px] uppercase tracking-widest mt-0.5">*** KITCHEN ORDER TICKET (KOT) ***</p>
+              <p className="text-[10px] uppercase tracking-wider text-stone-700">DHA Phase 5, Commercial Zone, Lahore</p>
+              <p className="text-[10px] uppercase tracking-wider text-stone-700">UAN: (042) 111-242-752</p>
+              <p className="text-[11px] font-black uppercase tracking-widest mt-1 border-t border-dotted border-black pt-1">
+                *** CUSTOMER BILL ***
+              </p>
             </div>
 
             {/* Table & Order Metadata */}
             <div className="border-b border-black pb-2 mb-2">
               <div className="flex justify-between items-center my-1">
-                <span className="text-[16px] font-black tracking-tight uppercase bg-black text-white px-2 py-0.5 rounded-sm">
+                <span className="text-[15px] font-black tracking-tight uppercase bg-black text-white px-2 py-0.5 rounded-xs">
                   {order.tableNumber.toUpperCase()}
                 </span>
-                <span className="text-[14px] font-black">{order.id}</span>
+                <span className="text-[13px] font-black">{order.id}</span>
               </div>
               <div className="flex justify-between text-[11px] text-black mt-1">
                 <span>DATE: {formattedDate}</span>
                 <span>TIME: {formattedTime}</span>
               </div>
-              <div className="flex justify-between text-[11px] text-black">
-                <span>SERVER: QR Live Feed</span>
-                <span className="font-bold">STATUS: {order.status.toUpperCase()}</span>
-              </div>
             </div>
 
-            {/* Preparation Items */}
+            {/* Ordered Items with Rates & Amounts */}
             <div className="border-b border-black pb-2 mb-2">
               <div className="flex justify-between font-black text-[11px] border-b border-dashed border-black pb-1 mb-1.5 uppercase">
-                <span>QTY & DISH ITEM</span>
-                <span>CHECK</span>
+                <span className="w-8">QTY</span>
+                <span className="flex-1 text-left px-1">DESCRIPTION</span>
+                <span className="w-12 text-right">RATE</span>
+                <span className="w-14 text-right">AMOUNT</span>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {order.items.map((item, idx) => (
-                  <div key={idx} className="border-b border-dotted border-stone-300 pb-1.5">
-                    <div className="flex justify-between items-start">
-                      <div className="font-black text-[13px] tracking-tight">
-                        {item.quantity}x {item.name.toUpperCase()}
-                      </div>
-                      <div className="w-3.5 h-3.5 border border-black rounded-xs inline-block mt-0.5" />
-                    </div>
+                  <div key={idx} className="flex justify-between items-baseline text-[12px] font-bold">
+                    <span className="w-8 font-black">{item.quantity}x</span>
+                    <span className="flex-1 text-left px-1 break-words">{item.name.toUpperCase()}</span>
+                    <span className="w-12 text-right font-mono text-stone-700">{item.unitPrice}</span>
+                    <span className="w-14 text-right font-mono font-black">
+                      {item.totalPrice ?? (item.unitPrice * item.quantity)}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Totals & Calculations */}
+            <div className="py-2 border-b-2 border-black text-[12px] space-y-1 font-mono">
+              <div className="flex justify-between">
+                <span>Items Subtotal:</span>
+                <span className="font-bold">Rs. {order.subtotal || order.totalAmount}</span>
+              </div>
+              {order.serviceCharge > 0 && (
+                <div className="flex justify-between text-stone-700">
+                  <span>Service Charge:</span>
+                  <span>Rs. {order.serviceCharge}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-[13px] font-black border-t-2 border-black pt-1.5 mt-1">
+                <span>GRAND TOTAL:</span>
+                <span>RS. {order.totalAmount}</span>
+              </div>
+            </div>
+
             {/* Ticket Footer */}
-            <div className="text-center pt-1 border-t border-black text-[10px]">
-              <p className="font-bold">Total Items: {order.items.reduce((acc, it) => acc + it.quantity, 0)}</p>
-              <p className="text-stone-600 mt-0.5">RestaurantOS Kitchen Display • Pass Copy</p>
+            <div className="text-center pt-2 text-[10px] space-y-0.5">
+              <p className="font-black uppercase tracking-wider">THANK YOU FOR DINING WITH US!</p>
+              <p className="text-stone-700">Please visit again soon.</p>
+              <p className="text-stone-600 mt-1">Wi-Fi: ChaskaCafe_Guest • Pass: karakchai2026</p>
               <p className="font-black text-[11px] mt-1">==============================</p>
             </div>
           </div>
@@ -123,7 +144,7 @@ export function KotThermalTicket({ order, isOpen, onClose }: KotThermalTicketPro
               className="px-4 py-2 bg-stone-900 hover:bg-black text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all active:scale-95"
             >
               <Printer className="w-3.5 h-3.5" />
-              Print KOT Ticket
+              Print 80mm Bill
             </button>
           </div>
         </div>

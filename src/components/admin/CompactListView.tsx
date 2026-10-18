@@ -169,7 +169,7 @@ export function CompactListView({
 
                         <button
                           onClick={() => onPrintKot(order)}
-                          title="Print 80mm Kitchen Ticket"
+                          title="Print 80mm Bill"
                           className="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg border border-stone-200 transition-colors"
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -343,7 +343,7 @@ export function CompactListView({
                 className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
               >
                 <Printer className="w-3.5 h-3.5" />
-                <span>Print Kitchen Ticket</span>
+                <span>Print Bill</span>
               </button>
 
               <div className="flex items-center gap-2">
