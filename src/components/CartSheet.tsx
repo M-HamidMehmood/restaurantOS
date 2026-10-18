@@ -171,14 +171,20 @@ export const CartSheet: React.FC = () => {
                 >
                   <div className="flex items-start gap-3">
                     {/* Item Thumbnail */}
-                    <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-stone-100 border border-stone-100">
-                      <Image
-                        src={cartItem.item.image}
-                        alt={cartItem.item.name}
-                        fill
-                        sizes="56px"
-                        className="object-cover"
-                      />
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-stone-100 border border-stone-100 flex items-center justify-center">
+                      {cartItem.item.image && typeof cartItem.item.image === 'string' && cartItem.item.image.trim().length > 0 ? (
+                        <Image
+                          src={cartItem.item.image.trim()}
+                          alt={cartItem.item.name}
+                          fill
+                          sizes="56px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="font-serif text-base font-bold text-stone-500">
+                          {cartItem.item.name.charAt(0)}
+                        </span>
+                      )}
                     </div>
 
                     {/* Item Title & Pricing */}

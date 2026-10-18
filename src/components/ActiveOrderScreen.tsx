@@ -405,14 +405,20 @@ export const ActiveOrderScreen: React.FC = () => {
                     className="p-3 rounded-xl border border-stone-200/80 bg-white shadow-2xs space-y-1.5"
                   >
                     <div className="flex items-start gap-2.5">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-stone-100">
-                        <Image
-                          src={cartItem.item.image}
-                          alt={cartItem.item.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-stone-100 flex items-center justify-center">
+                        {cartItem.item.image && typeof cartItem.item.image === 'string' && cartItem.item.image.trim().length > 0 ? (
+                          <Image
+                            src={cartItem.item.image.trim()}
+                            alt={cartItem.item.name}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="font-serif text-sm font-bold text-stone-500">
+                            {cartItem.item.name.charAt(0)}
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex-1 min-w-0">

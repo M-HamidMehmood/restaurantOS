@@ -190,9 +190,9 @@ export function Quick86SwitchBoard({
                   {/* Card Header with Image and Tags */}
                   <div className="flex gap-3 mb-3">
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-stone-100 shrink-0 border border-stone-200">
-                      {item.imageUrl ? (
+                      {item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim().length > 0 ? (
                         <Image
-                          src={item.imageUrl}
+                          src={item.imageUrl.trim()}
                           alt={item.name}
                           fill
                           className={`object-cover transition-transform duration-300 ${

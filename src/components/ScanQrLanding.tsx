@@ -172,7 +172,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
 
           {/* Real Scannable High-Res QR Card in center */}
           <div className="relative w-44 h-44 sm:w-48 sm:h-48 rounded-2xl bg-white p-2.5 shadow-2xl flex flex-col items-center justify-center overflow-hidden border-2 border-stone-100">
-            {qrDataUrl ? (
+            {qrDataUrl && typeof qrDataUrl === 'string' && qrDataUrl.trim().length > 0 ? (
               <img
                 src={qrDataUrl}
                 alt={`Scannable QR Code for Table ${selectedTable}`}

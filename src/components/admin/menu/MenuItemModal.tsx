@@ -447,9 +447,9 @@ export function MenuItemModal({
                 </label>
                 <div className="flex gap-4 items-center">
                   <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
-                    {imageUrl ? (
+                    {imageUrl && typeof imageUrl === 'string' && imageUrl.trim().length > 0 ? (
                       <Image
-                        src={imageUrl}
+                        src={imageUrl.trim()}
                         alt="Dish Preview"
                         fill
                         className="object-cover"

@@ -181,14 +181,14 @@ export const CustomizationModal: React.FC = () => {
       <DialogContent className="max-w-md w-full p-0 max-h-[92vh] flex flex-col rounded-3xl overflow-hidden border border-stone-200 shadow-2xl">
         {/* Header Hero Image & Dish Summary */}
         <div className="relative w-full h-44 sm:h-48 bg-stone-900 shrink-0">
-          {imageError ? (
+          {imageError || !customizingItem.image || typeof customizingItem.image !== 'string' || customizingItem.image.trim().length === 0 ? (
             <div className="w-full h-full bg-gradient-to-br from-amber-600 to-stone-900 flex flex-col items-center justify-center p-4 text-center text-white">
               <span className="font-serif text-3xl font-bold">{customizingItem.name.charAt(0)}</span>
               <span className="text-sm font-semibold mt-1">{customizingItem.name}</span>
             </div>
           ) : (
             <Image
-              src={customizingItem.image}
+              src={customizingItem.image.trim()}
               alt={customizingItem.name}
               fill
               className="object-cover opacity-90"

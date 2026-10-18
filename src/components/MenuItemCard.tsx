@@ -130,18 +130,9 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
         {/* Right Column: Image & Action */}
         <div className="relative shrink-0 flex flex-col items-center">
           <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-stone-100 border border-stone-100 shadow-2xs">
-            {imageError ? (
-              <div className="w-full h-full bg-gradient-to-br from-amber-50 via-stone-50 to-stone-100 flex flex-col items-center justify-center p-2 text-center text-stone-500">
-                <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-serif font-bold text-base mb-1 shadow-2xs">
-                  {item.name.charAt(0)}
-                </div>
-                <span className="text-[10px] font-semibold text-stone-600 line-clamp-1">
-                  {item.name}
-                </span>
-              </div>
-            ) : (
+            {item.image && typeof item.image === 'string' && item.image.trim().length > 0 && !imageError ? (
               <Image
-                src={item.image}
+                src={item.image.trim()}
                 alt={item.name}
                 fill
                 sizes="(max-width: 640px) 96px, 112px"
@@ -149,6 +140,15 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
                 onError={() => setImageError(true)}
                 loading="lazy"
               />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-amber-50 via-stone-50 to-stone-100 flex flex-col items-center justify-center p-2 text-center text-stone-500">
+                <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-serif font-bold text-base mb-1 shadow-2xs">
+                  {item.name ? item.name.charAt(0) : 'C'}
+                </div>
+                <span className="text-[10px] font-semibold text-stone-600 line-clamp-1">
+                  {item.name}
+                </span>
+              </div>
             )}
 
             {/* Out of Stock Overlay Ribbon */}

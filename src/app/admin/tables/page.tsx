@@ -348,7 +348,7 @@ export default function TableQrSetupPage() {
 
                   {/* Scannable High-Res QR Code Card */}
                   <div className="relative aspect-square w-full rounded-2xl bg-white border border-stone-200 p-3 flex flex-col items-center justify-center shadow-inner group-hover:shadow-md transition-shadow">
-                    {qrDataUrl ? (
+                    {qrDataUrl && typeof qrDataUrl === 'string' && qrDataUrl.trim().length > 0 ? (
                       <img
                         src={qrDataUrl}
                         alt={`Scannable QR for ${table.displayName}`}
@@ -496,7 +496,7 @@ export default function TableQrSetupPage() {
 
                 {/* Scannable High-Contrast QR Code */}
                 <div className="w-56 h-56 p-2 border-2 border-black rounded-2xl flex items-center justify-center bg-white">
-                  {qrDataUrl && (
+                  {qrDataUrl && typeof qrDataUrl === 'string' && qrDataUrl.trim().length > 0 && (
                     <img
                       src={qrDataUrl}
                       alt={`QR Code for ${table.displayName}`}

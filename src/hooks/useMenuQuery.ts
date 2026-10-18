@@ -44,7 +44,11 @@ async function fetchMenuData(): Promise<MenuDataResponse> {
           name: i.name,
           description: i.description || '',
           price: i.basePrice,
-          image: i.imageUrl || i.image || '',
+          image: (typeof i.imageUrl === 'string' && i.imageUrl.trim().length > 0)
+            ? i.imageUrl.trim()
+            : (typeof i.image === 'string' && i.image.trim().length > 0)
+              ? i.image.trim()
+              : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80',
           isAvailable: i.isAvailable,
           isOutOfStock: !i.isAvailable,
           isVegetarian: i.isVegetarian || false,
