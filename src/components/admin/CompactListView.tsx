@@ -114,12 +114,6 @@ export function CompactListView({
                           <span key={idx} className="mr-2">
                             <strong className="text-stone-900 font-extrabold">{it.quantity}x</strong>{' '}
                             {it.name}
-                            {it.selectedModifiers && it.selectedModifiers.length > 0 && (
-                              <span className="text-stone-500 text-[10px]">
-                                {' '}
-                                ({it.selectedModifiers.map((m) => m.name).join(', ')})
-                              </span>
-                            )}
                             {idx < order.items.length - 1 ? ' • ' : ''}
                           </span>
                         ))}

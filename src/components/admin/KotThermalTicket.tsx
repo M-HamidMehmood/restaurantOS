@@ -92,36 +92,10 @@ export function KotThermalTicket({ order, isOpen, onClose }: KotThermalTicketPro
                       </div>
                       <div className="w-3.5 h-3.5 border border-black rounded-xs inline-block mt-0.5" />
                     </div>
-
-                    {/* Modifiers */}
-                    {item.selectedModifiers && item.selectedModifiers.length > 0 && (
-                      <div className="pl-3 mt-0.5 space-y-0.5 text-[11px] font-bold text-stone-800">
-                        {item.selectedModifiers.map((mod, mIdx) => (
-                          <div key={mIdx}>
-                            &gt; {mod.name} {mod.priceExtra || mod.price ? `(+Rs. ${mod.priceExtra || mod.price})` : ''}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Line Item Notes */}
-                    {item.notes && (
-                      <div className="pl-3 mt-1 text-[11px] font-black uppercase text-black bg-stone-100 p-0.5 rounded-xs">
-                        * NOTE: {item.notes}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
             </div>
-
-            {/* Special Instructions Box */}
-            {order.notes && (
-              <div className="border-2 border-black p-1.5 mb-2 bg-stone-50">
-                <p className="text-[10px] font-black uppercase tracking-wider mb-0.5">SPECIAL ORDER INSTRUCTIONS:</p>
-                <p className="text-[12px] font-bold uppercase leading-snug">{order.notes}</p>
-              </div>
-            )}
 
             {/* Ticket Footer */}
             <div className="text-center pt-1 border-t border-black text-[10px]">

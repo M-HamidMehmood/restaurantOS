@@ -98,17 +98,6 @@ export function CustomerBillTicket({ bill, onClose }: CustomerBillTicketProps) {
                           {item.unitPrice * item.quantity}
                         </span>
                       </div>
-
-                      {/* Modifiers */}
-                      {item.selectedModifiers && item.selectedModifiers.length > 0 && (
-                        <div className="pl-8 text-[10px] italic">
-                          {item.selectedModifiers.map((m, mIdx) => (
-                            <div key={mIdx}>
-                              + {m.name} {m.priceExtra ? `(+Rs. ${m.priceExtra})` : ''}
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
