@@ -65,7 +65,7 @@
 }
 
 /* ==========================================================================
-   80mm Thermal Printer Styling (Kitchen Order Ticket - KOT)
+   80mm Thermal Printer Styling (Kitchen Order Ticket - KOT & Customer Bill)
    ========================================================================== */
 @media print {
   @page {
@@ -78,38 +78,53 @@
     padding: 0 !important;
     background: #ffffff !important;
     color: #000000 !important;
-    font-family: 'Courier New', Courier, monospace, monospace !important;
+    font-family: 'Courier New', Courier, monospace !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* Hide entire admin UI layout, sidebar, header, banners during print */
+  /* Hide entire admin UI layout, sidebar, header, banners, and modals during print */
   .no-print,
   nav,
   aside,
   header,
   button,
-  .sonner-toast,
+  [data-radix-portal],
   [data-sonner-toaster] {
     display: none !important;
+  }
+
+  /* Hide all elements on the page by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Make ONLY thermal slips & standee cards visible */
+  .customer-bill-print-container,
+  .customer-bill-print-container *,
+  .kot-thermal-print-container,
+  .kot-thermal-print-container *,
+  .table-standee-print-container,
+  .table-standee-print-container * {
+    visibility: visible !important;
   }
 
   /* Force display of the targeted KOT thermal print slip & Customer Bill */
   .kot-thermal-print-container,
   .customer-bill-print-container {
     display: block !important;
-    visibility: visible !important;
-    position: absolute !important;
+    position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 76mm !important;
     max-width: 80mm !important;
     padding: 3mm 2mm !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
     background: #ffffff !important;
     color: #000000 !important;
     font-size: 13px !important;
     line-height: 1.35 !important;
+    z-index: 99999999 !important;
   }
 }
 

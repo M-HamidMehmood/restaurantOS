@@ -59,12 +59,11 @@ export const RequestBillDialog: React.FC = () => {
   const activeOrders = useMenuStore((state) => state.activeOrders);
   const activeOrdersTotal = activeOrders.reduce((sum, ord) => sum + ord.totalAmount, 0);
 
-  // Calculate bill figures from active orders or current cart
-  const subtotal = activeOrdersTotal > 0 ? activeOrdersTotal : (totalCartPrice > 0 ? totalCartPrice : 500);
+  // Calculate bill figures from real active orders only
+  const subtotal = activeOrdersTotal;
   const serviceCharge = (subtotal * (restaurantInfo.serviceChargePercent || 5)) / 100;
-  const tax = (subtotal * (restaurantInfo.taxPercent || 5)) / 100;
-  const grandTotal = subtotal + serviceCharge + tax;
-  const splitPerPerson = grandTotal / splitCount;
+  const grandTotal = subtotal + serviceCharge;
+  const splitPerPerson = splitCount > 0 ? grandTotal / splitCount : grandTotal;
 
   const paymentOptions: {
     id: PaymentMethod;
@@ -138,13 +137,6 @@ export const RequestBillDialog: React.FC = () => {
             <span>
               {restaurantInfo.currencySymbol}
               {serviceCharge.toFixed(0)}
-            </span>
-          </div>
-          <div className="flex justify-between text-stone-600">
-            <span>Tax ({restaurantInfo.taxPercent}%)</span>
-            <span>
-              {restaurantInfo.currencySymbol}
-              {tax.toFixed(0)}
             </span>
           </div>
           <div className="pt-2 border-t border-stone-200 flex justify-between items-baseline">
@@ -255,7 +247,7 @@ export const RequestBillDialog: React.FC = () => {
                   <FormLabel>Special Note (Optional)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g. Printed receipt or GST invoice..."
+                      placeholder="e.g. Printed receipt or itemized invoice..."
                       {...field}
                     />
                   </FormControl>
@@ -276,7 +268,8 @@ export const RequestBillDialog: React.FC = () => {
               <Button
                 type="submit"
                 variant="default"
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                disabled={subtotal <= 0}
+                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white gap-2 disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />
                 <span>Request Bill</span>

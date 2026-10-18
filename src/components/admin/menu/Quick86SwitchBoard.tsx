@@ -119,7 +119,7 @@ export function Quick86SwitchBoard({
               }`}
             >
               <XCircle className="w-3.5 h-3.5" />
-              86'd Out ({outOfStockCount})
+              Out of Stock ({outOfStockCount})
             </button>
           </div>
         </div>
@@ -208,7 +208,7 @@ export function Quick86SwitchBoard({
                       {isOutOfStock && (
                         <div className="absolute inset-0 bg-red-900/40 flex items-center justify-center">
                           <span className="text-[10px] font-black uppercase text-white tracking-widest bg-red-600 px-1 py-0.5 rounded-sm">
-                            86'D
+                            OUT OF STOCK
                           </span>
                         </div>
                       )}
@@ -286,7 +286,7 @@ export function Quick86SwitchBoard({
                     ) : (
                       <>
                         <AlertTriangle className="w-4 h-4 text-white" />
-                        <span>86'D (OUT OF STOCK)</span>
+                        <span>OUT OF STOCK</span>
                       </>
                     )}
                   </button>

@@ -20,7 +20,7 @@ export const envSchema = z.object({
   CURRENCY_CODE: z.string().default('PKR'),
   CURRENCY_SYMBOL: z.string().default('Rs. '),
   SERVICE_CHARGE_PERCENT: z.coerce.number().default(5),
-  TAX_PERCENT: z.coerce.number().default(5),
+  TAX_PERCENT: z.coerce.number().default(0),
 
   // CORS
   CORS_ORIGINS: z.string().default('http://localhost:3000'),

@@ -133,7 +133,7 @@ export default function MenuManagerPage() {
               <div>
                 <h1 className="text-xl font-black text-stone-900 flex items-center gap-2">
                   <UtensilsCrossed className="w-5 h-5 text-amber-600" />
-                  Menu Manager & 86-Stock Control
+                  Menu Manager & Stock Control
                 </h1>
                 <p className="text-xs text-stone-500 font-medium">
                   Instant out-of-stock switches, category hierarchy, pricing, and modifier groups.
@@ -229,7 +229,7 @@ export default function MenuManagerPage() {
               }`}
             >
               <ToggleLeft className="w-4 h-4" />
-              <span>Daily Quick-Toggle ("86" Switch Mode)</span>
+              <span>Daily Stock Availability</span>
             </button>
 
             <button

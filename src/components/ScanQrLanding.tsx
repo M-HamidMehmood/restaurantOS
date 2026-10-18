@@ -417,7 +417,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
                 4. Bill Settlement & Payments
               </h5>
               <p className="text-stone-400 leading-relaxed">
-                Final bills include ordered items and applicable taxes. You may request bill settlement directly from your mobile screen via cash, credit/debit card, or online transfer with your floor server.
+                Final bills include ordered items and service. You may request bill settlement directly from your mobile screen via cash, credit/debit card, or online transfer with your floor server.
               </p>
             </div>
           </div>

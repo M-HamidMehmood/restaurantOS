@@ -177,6 +177,95 @@ export function playSettlementChime() {
   }
 }
 
+/**
+ * Urgent double-beep staccato chime for orders reaching 3 minutes remaining in kitchen.
+ */
+export function playSinglePrepAlert() {
+  if (isMuted) return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    // Tone 1 (Urgent staccato)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(880, now); // A5 note
+    gain1.gain.setValueAtTime(0.25, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.15);
+
+    // Tone 2 (Higher urgency)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(1174.66, now + 0.16); // D6 note
+    gain2.gain.setValueAtTime(0.28, now + 0.16);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.16);
+    osc2.stop(now + 0.36);
+  } catch (err) {
+    console.warn('Could not play prep alert:', err);
+  }
+}
+
+let prepAlertInterval: ReturnType<typeof setInterval> | null = null;
+let prepAlertStopTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * 10-second preparation alert when 3 minutes remain for kitchen orders.
+ * Includes Web Speech synthesis voice announcement if available.
+ */
+export function playPrepUrgentAlert(orderInfo?: { orderId?: string; tableNumber?: string }) {
+  if (isMuted) return;
+
+  // Stop any previous prep alert
+  if (prepAlertInterval) clearInterval(prepAlertInterval);
+  if (prepAlertStopTimer) clearTimeout(prepAlertStopTimer);
+
+  // Voice announcement: speak aloud to kitchen / admin
+  try {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const table = orderInfo?.tableNumber || 'Table';
+      const text = `Attention! ${table} order has 3 minutes remaining!`;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.1;
+      utterance.volume = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
+  } catch {}
+
+  // Play initial chime
+  playSinglePrepAlert();
+
+  // Pulse alert every 2 seconds for exactly 10 seconds
+  const start = Date.now();
+  prepAlertInterval = setInterval(() => {
+    if (isMuted || Date.now() - start >= 10000) {
+      if (prepAlertInterval) clearInterval(prepAlertInterval);
+      prepAlertInterval = null;
+      return;
+    }
+    playSinglePrepAlert();
+  }, 2000);
+
+  // Hard stop at exactly 10 seconds
+  prepAlertStopTimer = setTimeout(() => {
+    if (prepAlertInterval) {
+      clearInterval(prepAlertInterval);
+      prepAlertInterval = null;
+    }
+  }, 10000);
+}
+
 // =========================================================================
 // Continuous Repeating Alert Engine (Rings for 3 minutes without stopping)
 // =========================================================================
@@ -288,6 +377,19 @@ export function stopContinuousAlert() {
     clearTimeout(alertHardStopTimer);
     alertHardStopTimer = null;
   }
+  if (prepAlertInterval) {
+    clearInterval(prepAlertInterval);
+    prepAlertInterval = null;
+  }
+  if (prepAlertStopTimer) {
+    clearTimeout(prepAlertStopTimer);
+    prepAlertStopTimer = null;
+  }
+  try {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+  } catch {}
 
   if (isAlertRinging) {
     isAlertRinging = false;

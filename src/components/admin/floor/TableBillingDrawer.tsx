@@ -63,8 +63,8 @@ export function TableBillingDrawer({
   const [discountType, setDiscountType] = useState<DiscountType>('percentage');
   const [discountValue, setDiscountValue] = useState<number>(0);
 
-  // Configurable Tax rate (e.g. 5% GST standard for restaurant POS)
-  const [taxRatePercent, setTaxRatePercent] = useState<number>(5);
+  // Tax rate (disabled / 0% GST)
+  const [taxRatePercent, setTaxRatePercent] = useState<number>(0);
 
   // Payment checkout state
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'upi/online'>('cash');
@@ -81,7 +81,7 @@ export function TableBillingDrawer({
       setCustomItems([]);
       setDiscountValue(0);
       setDiscountType('percentage');
-      setTaxRatePercent(5);
+      setTaxRatePercent(0);
       setCashierNotes('');
 
       // If customer requested bill with preferred method, pre-select it
@@ -198,11 +198,11 @@ export function TableBillingDrawer({
 
     const afterDiscount = Math.max(0, itemsSubtotal - discountAmount);
 
-    // 3. Calculate tax (GST)
-    const taxAmount = Math.round((afterDiscount * Math.max(0, taxRatePercent)) / 100);
+    // 3. Tax (GST removed)
+    const taxAmount = 0;
 
     // 4. Final bill total
-    const finalTotal = afterDiscount + taxAmount;
+    const finalTotal = afterDiscount;
 
     // 5. Cash tendered & change calculation
     const amountTenderedNum = parseInt(amountTenderedStr, 10) || 0;
@@ -689,7 +689,7 @@ export function TableBillingDrawer({
           {hasOrders && (
             <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200 space-y-4">
               <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                Discounts & Tax Configuration
+                Discount Configuration
               </h4>
 
               {/* Discount Selector */}
@@ -756,27 +756,6 @@ export function TableBillingDrawer({
                   <span className="text-xs font-semibold text-stone-500 whitespace-nowrap">
                     {discountType === 'percentage' ? '% Off' : 'PKR Off'}
                   </span>
-                </div>
-              </div>
-
-              {/* Tax Rate Stepper (GST) */}
-              <div className="pt-2 border-t border-stone-200 flex items-center justify-between text-xs">
-                <span className="font-semibold text-stone-700">Govt GST / Sales Tax Rate</span>
-                <div className="flex items-center gap-1.5">
-                  {[0, 5, 16].map((rate) => (
-                    <button
-                      key={rate}
-                      type="button"
-                      onClick={() => setTaxRatePercent(rate)}
-                      className={`px-2.5 py-1 font-bold rounded-lg border transition-all ${
-                        taxRatePercent === rate
-                          ? 'bg-stone-900 border-stone-900 text-white shadow-xs'
-                          : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
-                      }`}
-                    >
-                      {rate === 0 ? '0% (Exempt)' : `${rate}% GST`}
-                    </button>
-                  ))}
                 </div>
               </div>
             </div>
@@ -934,13 +913,6 @@ export function TableBillingDrawer({
                     Discount ({discountType === 'percentage' ? `${discountValue}%` : 'Flat'}):
                   </span>
                   <span>- Rs. {calculations.discountAmount.toLocaleString()}</span>
-                </div>
-              )}
-
-              {calculations.taxAmount > 0 && (
-                <div className="flex justify-between text-stone-500">
-                  <span>Govt GST ({taxRatePercent}%):</span>
-                  <span>+ Rs. {calculations.taxAmount.toLocaleString()}</span>
                 </div>
               )}
 

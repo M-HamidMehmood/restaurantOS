@@ -7,6 +7,7 @@ import {
   playOrderChime,
   playWaiterAlert,
   playReadyChime,
+  playPrepUrgentAlert,
   getSoundMuted,
   setSoundMuted,
   startContinuousAlert,
@@ -596,6 +597,41 @@ export function useAdminOperations() {
       console.error('Failed to resolve service request:', err);
     }
   };
+
+  // Set of order IDs that have already fired the 3-minute prep warning
+  const alertedPrepOrderIds = useRef<Set<string>>(new Set());
+
+  // Monitor kitchen orders for the 3-minute remaining mark
+  // Target preparation time is 12 minutes standard. When remaining time reaches 3 minutes (elapsed >= 9 mins, remaining <= 3 mins), alert for 10s.
+  useEffect(() => {
+    const checkPrepTimers = () => {
+      const now = Date.now();
+      const PREP_TARGET_MS = 12 * 60 * 1000; // 12 minutes
+      const THREE_MIN_MS = 3 * 60 * 1000; // 3 minutes remaining
+
+      orders.forEach((order) => {
+        if (order.status === 'preparing') {
+          const createdAt = new Date(order.createdAt).getTime();
+          if (isNaN(createdAt)) return;
+          const elapsedMs = now - createdAt;
+          const remainingMs = PREP_TARGET_MS - elapsedMs;
+
+          // If remaining time is <= 3 minutes and order has not exceeded 15 minutes and hasn't been alerted yet
+          if (remainingMs <= THREE_MIN_MS && remainingMs > 0 && !alertedPrepOrderIds.current.has(order.id)) {
+            alertedPrepOrderIds.current.add(order.id);
+            playPrepUrgentAlert({ orderId: order.id, tableNumber: order.tableNumber });
+            toast.warning(`⏳ Order #${order.id} (${order.tableNumber}) — 3 minutes remaining!`, {
+              id: `prep-warn-${order.id}`,
+              duration: 10000,
+            });
+          }
+        }
+      });
+    };
+
+    const interval = setInterval(checkPrepTimers, 5000); // Check every 5 seconds
+    return () => clearInterval(interval);
+  }, [orders]);
 
   // Computed count of active non-completed, non-cancelled orders
   const activeOrdersCount = orders.filter(

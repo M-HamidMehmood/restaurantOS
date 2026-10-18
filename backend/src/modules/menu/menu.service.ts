@@ -24,7 +24,7 @@ export class MenuService {
       currencyCode: this.configService.get<string>('CURRENCY_CODE', 'PKR'),
       currencySymbol: this.configService.get<string>('CURRENCY_SYMBOL', 'Rs. '),
       serviceChargePercent: this.configService.get<number>('SERVICE_CHARGE_PERCENT', 5),
-      taxPercent: this.configService.get<number>('TAX_PERCENT', 5),
+      taxPercent: this.configService.get<number>('TAX_PERCENT', 0),
     };
 
     // Query active categories with their available menu items ("86" filter) and modifiers

@@ -72,7 +72,7 @@ export function AdminTopBar({
             }`}
           >
             <Kanban className="w-3.5 h-3.5 text-amber-500" />
-            <span>Kanban</span>
+            <span>Kitchen Board</span>
           </button>
 
           <button
@@ -84,7 +84,7 @@ export function AdminTopBar({
             }`}
           >
             <List className="w-3.5 h-3.5 text-amber-500" />
-            <span>Compact List</span>
+            <span>Order History</span>
           </button>
         </div>
 

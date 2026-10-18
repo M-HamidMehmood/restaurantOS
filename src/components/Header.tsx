@@ -15,6 +15,8 @@ export const Header: React.FC = () => {
   const isWaiterOnCooldown = useMenuStore((state) => state.isWaiterOnCooldown);
   const getWaiterRemainingSeconds = useMenuStore((state) => state.getWaiterRemainingSeconds);
   const isBillRequested = useMenuStore((state) => state.isBillRequested);
+  const activeOrders = useMenuStore((state) => state.activeOrders);
+  const hasActiveOrder = activeOrders.length > 0;
 
   // Live countdown timer state for 2-minute cooldown
   const [secondsRemaining, setSecondsRemaining] = useState<number>(0);
@@ -93,20 +95,30 @@ export const Header: React.FC = () => {
             )}
           </Button>
 
-          {/* Request Bill Button */}
+          {/* Request Bill Button (Disabled until customer has an active order) */}
           <Button
             type="button"
             variant={isBillRequested ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setIsBillOpen(true)}
-            className={`relative font-bold text-xs h-9 justify-center gap-1.5 ${
-              isBillRequested ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''
+            disabled={!hasActiveOrder}
+            onClick={() => {
+              if (hasActiveOrder) {
+                setIsBillOpen(true);
+              }
+            }}
+            title={!hasActiveOrder ? 'Please place an order before requesting your bill' : undefined}
+            className={`relative font-bold text-xs h-9 justify-center gap-1.5 transition-all ${
+              !hasActiveOrder
+                ? 'opacity-40 cursor-not-allowed bg-stone-50 text-stone-400 border-stone-200 shadow-none'
+                : isBillRequested
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : ''
             }`}
           >
             {isBillRequested ? (
               <Check className="w-3.5 h-3.5 text-white" />
             ) : (
-              <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+              <Receipt className={`w-3.5 h-3.5 ${hasActiveOrder ? 'text-emerald-600' : 'text-stone-400'}`} />
             )}
             <span>{isBillRequested ? 'Bill Requested' : 'Request Bill'}</span>
           </Button>

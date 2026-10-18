@@ -7,7 +7,7 @@ export const restaurantInfo: RestaurantInfo = {
   wifiName: 'ChaskaCafe_Guest',
   wifiPassword: 'karakchai2026',
   serviceChargePercent: 5,
-  taxPercent: 5,
+  taxPercent: 0,
 };
 
 export const categories: Category[] = [

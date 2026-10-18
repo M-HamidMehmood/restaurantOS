@@ -48,8 +48,7 @@ export const CartSheet: React.FC = () => {
 
   const subtotal = totalCartPrice;
   const serviceCharge = (subtotal * (restaurantInfo.serviceChargePercent || 5)) / 100;
-  const tax = (subtotal * (restaurantInfo.taxPercent || 5)) / 100;
-  const grandTotal = subtotal + serviceCharge + tax;
+  const grandTotal = subtotal + serviceCharge;
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) return;
@@ -318,13 +317,6 @@ export const CartSheet: React.FC = () => {
                   <span>
                     {restaurantInfo.currencySymbol}
                     {serviceCharge.toFixed(0)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>GST / Tax ({restaurantInfo.taxPercent}%)</span>
-                  <span>
-                    {restaurantInfo.currencySymbol}
-                    {tax.toFixed(0)}
                   </span>
                 </div>
                 <div className="flex justify-between font-bold text-stone-900 text-sm pt-1.5 border-t border-stone-200">

@@ -13,6 +13,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { AdminOrder } from '@/types/admin';
+import { formatOrderAge } from '@/lib/dateUtils';
 
 interface OrderTicketCardProps {
   order: AdminOrder;
@@ -86,7 +87,7 @@ export function OrderTicketCard({
             ) : (
               <Clock className="w-3 h-3" />
             )}
-            <span>{elapsedMinutes}m ago</span>
+            <span>{formatOrderAge(order.createdAt)}</span>
           </div>
 
           <span className="font-extrabold text-xs text-stone-900 bg-white px-2 py-0.5 rounded-md border border-stone-200">

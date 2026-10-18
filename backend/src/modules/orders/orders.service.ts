@@ -149,11 +149,11 @@ export class OrdersService {
 
     // 3. Financial Recalculation (PKR whole rupee rounding)
     const servicePercent = this.configService.get<number>('SERVICE_CHARGE_PERCENT', 5);
-    const taxPercent = this.configService.get<number>('TAX_PERCENT', 5);
+    const taxPercent = this.configService.get<number>('TAX_PERCENT', 0);
 
     const calculatedServiceCharge = Math.round(calculatedSubtotal * (servicePercent / 100));
-    const calculatedTax = Math.round(calculatedSubtotal * (taxPercent / 100));
-    const calculatedGrandTotal = calculatedSubtotal + calculatedServiceCharge + calculatedTax;
+    const calculatedTax = 0;
+    const calculatedGrandTotal = calculatedSubtotal + calculatedServiceCharge;
 
     // Optional Anti-Fraud check if client submitted total
     if (dto.totalAmount && Math.abs(calculatedGrandTotal - dto.totalAmount) > 1) {

@@ -377,8 +377,8 @@ export function useFloorManagement() {
           body: JSON.stringify({
             paymentMethod: settlement.paymentMethod,
             notes: settlement.notes
-              ? `${settlement.notes} | Subtotal: Rs. ${settlement.itemsSubtotal}, Disc: Rs. ${settlement.discountAmount}, Tax: Rs. ${settlement.taxAmount}, Total: Rs. ${settlement.finalTotal}`
-              : `Subtotal: Rs. ${settlement.itemsSubtotal}, Disc: Rs. ${settlement.discountAmount}, Tax: Rs. ${settlement.taxAmount}, Total: Rs. ${settlement.finalTotal}`,
+              ? `${settlement.notes} | Subtotal: Rs. ${settlement.itemsSubtotal}, Disc: Rs. ${settlement.discountAmount}, Total: Rs. ${settlement.finalTotal}`
+              : `Subtotal: Rs. ${settlement.itemsSubtotal}, Disc: Rs. ${settlement.discountAmount}, Total: Rs. ${settlement.finalTotal}`,
           }),
         });
 

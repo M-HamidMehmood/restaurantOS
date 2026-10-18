@@ -29,12 +29,12 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
 
   const navLinks = [
     {
-      label: 'Live Feed',
+      label: 'Live Orders',
       href: '/admin',
       icon: Activity,
       badge: activeOrdersCount > 0 ? activeOrdersCount : undefined,
       badgeColor: 'bg-amber-500 text-stone-950',
-      description: 'Kitchen stream & tickets',
+      description: 'Active kitchen orders',
       superAdminOnly: false,
     },
     {
@@ -48,14 +48,14 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
       label: 'Menu Manager',
       href: '/admin/menu',
       icon: UtensilsCrossed,
-      description: 'Daily 86-stock & catalog',
+      description: 'Stock availability & dishes',
       superAdminOnly: true,
     },
     {
       label: 'Table QR Setup',
       href: '/admin/tables',
       icon: QrCode,
-      description: 'QR provisioning & slugs',
+      description: 'QR codes & table links',
       superAdminOnly: true,
     },
   ];
