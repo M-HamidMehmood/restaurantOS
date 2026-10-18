@@ -40,11 +40,11 @@ export default function AdminLoginPage() {
     }
   };
 
-  const handleQuickLogin = async (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
+  const handleQuickLogin = async (roleEmail: string, rolePass: string) => {
+    setEmail(roleEmail);
+    setPassword(rolePass);
     setSubmitting(true);
-    const res = await signIn(demoEmail, demoPass);
+    const res = await signIn(roleEmail, rolePass);
     setSubmitting(false);
 
     if (!res.success) {
@@ -131,7 +131,7 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Credentials / 1-Click Access */}
+          {/* Quick Role Login / 1-Click Access */}
           <div className="pt-2 border-t border-stone-800/80 space-y-3">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400">
               <Sparkles className="w-3.5 h-3.5" />

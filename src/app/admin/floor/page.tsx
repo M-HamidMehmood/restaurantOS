@@ -1,15 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
   LayoutGrid,
   ArrowLeft,
   RefreshCw,
-  Sparkles,
   Wifi,
   WifiOff,
-  BellRing,
   UtensilsCrossed,
   Layers,
   Store,
@@ -20,7 +18,6 @@ import { TableFloorGrid } from '@/components/admin/floor/TableFloorGrid';
 import { TableBillingDrawer } from '@/components/admin/floor/TableBillingDrawer';
 import { CustomerBillTicket } from '@/components/admin/floor/CustomerBillTicket';
 import { useFloorManagement } from '@/hooks/useFloorManagement';
-import { toast } from 'sonner';
 
 export default function FloorAndBillingPage() {
   const {
@@ -35,101 +32,6 @@ export default function FloorAndBillingPage() {
     resolveWaiterCall,
     settleTableSession,
   } = useFloorManagement();
-
-  // Simulation loading states for quick demonstration & manual testing
-  const [isSimulatingOrder, setIsSimulatingOrder] = useState(false);
-  const [isSimulatingWaiterCall, setIsSimulatingWaiterCall] = useState(false);
-
-  // Quick simulation: Dispatch order for a random table
-  const handleSimulateOrder = async () => {
-    setIsSimulatingOrder(true);
-    try {
-      // Pick a table that is NOT currently bill_requested
-      const nonBilling = tables.filter((t) => t.status !== 'bill_requested');
-      const tablePool =
-        nonBilling.length > 0
-          ? nonBilling.map((t) => t.tableNumber)
-          : ['T-01', 'T-04', 'T-05', 'T-06', 'T-07', 'T-08'];
-      const chosenTable = tablePool[Math.floor(Math.random() * tablePool.length)];
-
-      const samplePayload = {
-        tableId: chosenTable,
-        items: [
-          {
-            menuItemId: 'c0000000-0000-0000-0000-000000000001',
-            quantity: 2,
-            selectedModifiers: [
-              { id: 'd0000000-0000-0000-0000-000000000001', name: 'Cheddar Cheese Slice', priceExtra: 60 },
-            ],
-            notes: 'Extra crispy patties please',
-          },
-          {
-            menuItemId: 'c0000000-0000-0000-0000-000000000007',
-            quantity: 2,
-            selectedModifiers: [],
-            notes: 'Piping hot karak chai',
-          },
-        ],
-        notes: 'Simulated customer dine-in tab',
-      };
-
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-      const res = await fetch(`${apiBase}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(samplePayload),
-      });
-
-      if (res.ok) {
-        const data = await res.json().catch(() => null);
-        const orderId = data?.data?.orderId || data?.orderId || '';
-        toast.success(`Dispatched simulated order ${orderId ? `#${orderId} ` : ''}for Table ${chosenTable}!`);
-        await fetchFloorData();
-      } else {
-        const errorData = await res.json().catch(() => null);
-        toast.error(errorData?.message || `Failed to dispatch order for Table ${chosenTable}`);
-      }
-    } catch (e: any) {
-      toast.error(e?.message || 'Network error simulating order.');
-    } finally {
-      setIsSimulatingOrder(false);
-    }
-  };
-
-  // Quick simulation: Trigger a Call Waiter alert
-  const handleSimulateWaiterCall = async () => {
-    setIsSimulatingWaiterCall(true);
-    try {
-      const tablePool =
-        tables.length > 0
-          ? tables.map((t) => t.tableNumber)
-          : ['T-01', 'T-04', 'T-06'];
-      const chosenTable = tablePool[Math.floor(Math.random() * tablePool.length)];
-
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-      const res = await fetch(`${apiBase}/service/call-waiter`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tableId: chosenTable,
-          reason: 'water',
-          customNote: 'Needs extra napkins and water refill',
-        }),
-      });
-
-      if (res.ok) {
-        toast.warning(`Waiter assistance call simulated for Table ${chosenTable}!`);
-        await fetchFloorData();
-      } else {
-        const errorData = await res.json().catch(() => null);
-        toast.error(errorData?.message || `Failed to trigger waiter call for Table ${chosenTable}`);
-      }
-    } catch (e: any) {
-      toast.error(e?.message || 'Network error simulating waiter call.');
-    } finally {
-      setIsSimulatingWaiterCall(false);
-    }
-  };
 
   // Active orders count across all occupied tables
   const activeOrdersCount = tables.reduce((acc, t) => acc + (t.activeOrdersCount || 0), 0);
@@ -201,30 +103,6 @@ export default function FloorAndBillingPage() {
                 title="Refresh Floor Data"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              </button>
-
-              {/* Quick Simulator: Call Waiter */}
-              <button
-                type="button"
-                onClick={handleSimulateWaiterCall}
-                disabled={isSimulatingWaiterCall}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all shadow-xs"
-                title="Simulate a customer pressing Call Waiter button"
-              >
-                <BellRing className="w-3.5 h-3.5 text-rose-600" />
-                <span>Simulate Waiter Call</span>
-              </button>
-
-              {/* Quick Simulator: Dine-In Order */}
-              <button
-                type="button"
-                onClick={handleSimulateOrder}
-                disabled={isSimulatingOrder}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-stone-950 rounded-xl text-xs font-black transition-all shadow-xs"
-                title="Simulate a customer ordering from mobile QR menu"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>+ Simulate Dine-In Order</span>
               </button>
             </div>
           </div>

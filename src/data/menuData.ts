@@ -340,7 +340,7 @@ export const menuItems: MenuItem[] = [
     categoryId: 'burgers',
     isVegetarian: false,
     spicyLevel: 2,
-    isOutOfStock: true, // Demonstrated out-of-stock
+    isOutOfStock: true, // Out-of-stock item example
     calories: 990,
     preparationTime: '15 min',
     allergens: ['Gluten', 'Dairy'],

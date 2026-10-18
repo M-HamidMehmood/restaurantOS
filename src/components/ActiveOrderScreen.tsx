@@ -36,7 +36,6 @@ export const ActiveOrderScreen: React.FC = () => {
   const activeOrders = useMenuStore((state) => state.activeOrders);
   const selectedActiveOrderId = useMenuStore((state) => state.selectedActiveOrderId);
   const setSelectedActiveOrderId = useMenuStore((state) => state.setSelectedActiveOrderId);
-  const updateOrderStatus = useMenuStore((state) => state.updateOrderStatus);
   const getFormattedTable = useMenuStore((state) => state.getFormattedTable);
 
   const callWaiter = useMenuStore((state) => state.callWaiter);
@@ -57,7 +56,6 @@ export const ActiveOrderScreen: React.FC = () => {
     return () => clearInterval(interval);
   }, [getWaiterRemainingSeconds]);
 
-  // Current active order to display
   const currentOrder: ActiveOrder | undefined = React.useMemo(() => {
     if (selectedActiveOrderId) {
       const match = activeOrders.find((o) => o.orderId === selectedActiveOrderId);
@@ -65,39 +63,6 @@ export const ActiveOrderScreen: React.FC = () => {
     }
     return activeOrders[0];
   }, [activeOrders, selectedActiveOrderId]);
-
-  // Auto-progress simulation for realistic demo experience (Received -> Preparing -> Served)
-  useEffect(() => {
-    if (!currentOrder) return;
-
-    if (currentOrder.status === 'received') {
-      const timer = setTimeout(() => {
-        updateOrderStatus(
-          currentOrder.orderId,
-          'preparing',
-          'Chef began cooking dishes in the cafe kitchen'
-        );
-        toast.info(`Order #${currentOrder.orderId} is now Preparing!`, {
-          description: 'The kitchen has started cooking your order.',
-        });
-      }, 12000); // 12 seconds demo transition
-      return () => clearTimeout(timer);
-    }
-
-    if (currentOrder.status === 'preparing') {
-      const timer = setTimeout(() => {
-        updateOrderStatus(
-          currentOrder.orderId,
-          'served',
-          'Dishes brought to Table 04 by server'
-        );
-        toast.success(`Order #${currentOrder.orderId} has been Served!`, {
-          description: 'Enjoy your meal at Chaska & Chai Cafe.',
-        });
-      }, 25000); // 25 seconds demo transition
-      return () => clearTimeout(timer);
-    }
-  }, [currentOrder, updateOrderStatus]);
 
   if (!currentOrder && activeOrders.length === 0) return null;
 
@@ -344,33 +309,6 @@ export const ActiveOrderScreen: React.FC = () => {
                     : '~10-12 minutes remaining'}
                 </span>
               </div>
-
-              {/* Demo Status Switcher (Inside clean collapsible details so it doesn't clutter customer view) */}
-              <details className="group pt-2 border-t border-stone-100 text-left">
-                <summary className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider cursor-pointer hover:text-stone-600 flex items-center justify-between list-none">
-                  <span>Demo Simulation Controls</span>
-                  <span className="text-[10px] text-amber-600 font-bold group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div className="pt-2 flex items-center justify-between">
-                  <span className="text-[10px] text-stone-500">Fast-forward status:</span>
-                  <div className="flex gap-1">
-                    {(['received', 'preparing', 'served'] as OrderStatus[]).map((st) => (
-                      <button
-                        key={st}
-                        type="button"
-                        onClick={() => updateOrderStatus(currentOrder.orderId, st)}
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md capitalize transition-colors cursor-pointer ${
-                          currentOrder.status === st
-                            ? 'bg-stone-900 text-white'
-                            : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                        }`}
-                      >
-                        {st}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </details>
             </Card>
           )}
 

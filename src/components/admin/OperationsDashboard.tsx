@@ -8,7 +8,6 @@ import {
   CheckCircle,
   Inbox,
   Volume2,
-  Sparkles,
   RefreshCw,
 } from 'lucide-react';
 import { useAdminOperations } from '@/hooks/useAdminOperations';
@@ -20,7 +19,6 @@ import { CompactListView } from './CompactListView';
 import { KotThermalTicket } from './KotThermalTicket';
 import { RejectOrderModal } from './RejectOrderModal';
 import { AdminOrder } from '@/types/admin';
-import { toast } from 'sonner';
 
 export function OperationsDashboard() {
   const {
@@ -50,61 +48,6 @@ export function OperationsDashboard() {
 
   // Status Filter for Compact List view
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'pending' | 'preparing' | 'ready' | 'served'>('all');
-
-  // Quick test simulation order (creates a realistic live order for demonstration & test purposes)
-  const [isSimulating, setIsSimulating] = useState(false);
-  const handleSimulateOrder = async () => {
-    setIsSimulating(true);
-    try {
-      // Pick available tables that are not in billing finalization
-      const safeTables = ['T-01', 'T-02', 'T-04', 'T-05', 'T-06', 'T-07', 'T-08'];
-      const chosenTable = safeTables[Math.floor(Math.random() * safeTables.length)];
-
-      const samplePayload = {
-        tableId: chosenTable,
-        items: [
-          {
-            menuItemId: 'c0000000-0000-0000-0000-000000000001',
-            quantity: Math.floor(Math.random() * 2) + 1,
-            selectedModifiers: [
-              { id: 'd0000000-0000-0000-0000-000000000001', name: 'Cheddar Cheese Slice', priceExtra: 60 },
-            ],
-            notes: 'Extra crispy shami patty please',
-          },
-          {
-            menuItemId: 'c0000000-0000-0000-0000-000000000007',
-            quantity: 2,
-            selectedModifiers: [],
-            notes: 'Serve piping hot with jaggery',
-          },
-        ],
-        notes: 'Table guest simulation test order',
-      };
-
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-      const res = await fetch(`${apiBase}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(samplePayload),
-      });
-
-      if (res.ok) {
-        const data = await res.json().catch(() => null);
-        const orderId = data?.data?.orderId || data?.orderId || '';
-        toast.success(
-          `Dispatched simulated order ${orderId ? `#${orderId} ` : ''}for Table ${chosenTable}! Live stream received.`,
-          { id: `sim-order-${chosenTable}` }
-        );
-      } else {
-        const errorData = await res.json().catch(() => null);
-        toast.error(errorData?.message || `Failed to dispatch order for Table ${chosenTable}`);
-      }
-    } catch (e: any) {
-      toast.error(e?.message || 'Network error simulating order.');
-    } finally {
-      setIsSimulating(false);
-    }
-  };
 
   // Filtered orders for list view
   const filteredOrders = orders.filter((o) => {
@@ -161,7 +104,7 @@ export function OperationsDashboard() {
               </p>
             </div>
 
-            {/* Quick Demo Simulator & Filter Pills */}
+            {/* Filter Pills */}
             <div className="flex items-center gap-2 flex-wrap">
               {viewMode === 'list' && (
                 <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-stone-200 text-xs font-semibold">
@@ -207,16 +150,6 @@ export function OperationsDashboard() {
                   </button>
                 </div>
               )}
-
-              {/* Simulation button for pairing & end-to-end testing */}
-              <button
-                onClick={handleSimulateOrder}
-                disabled={isSimulating}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-amber-50 text-stone-700 hover:text-amber-900 border border-stone-200 hover:border-amber-300 rounded-xl text-xs font-bold shadow-2xs transition-all active:scale-95 disabled:opacity-50"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Simulate Order</span>
-              </button>
             </div>
           </div>
 

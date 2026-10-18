@@ -117,7 +117,7 @@ export const TableSwitchDialog: React.FC = () => {
 
             <div>
               <span className="block text-[11px] font-medium text-stone-500 mb-1.5">
-                Quick Test Tables (QR simulation):
+                Available Dining Tables:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {quickTables.map((t) => (

@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   Shield,
 } from 'lucide-react';
-import { playOrderChime, stopContinuousAlert, subscribeToAlertState } from '@/lib/sound';
+import { stopContinuousAlert, subscribeToAlertState } from '@/lib/sound';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 
 interface AdminTopBarProps {
@@ -119,8 +119,8 @@ export function AdminTopBar({
           </button>
         )}
 
-        {/* Sound Chime Toggle & Test */}
-        <div className="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-xl px-2 py-1">
+        {/* Sound Chime Toggle */}
+        <div className="flex items-center bg-stone-50 border border-stone-200 rounded-xl px-1.5 py-1">
           <button
             onClick={onToggleSound}
             title={soundMuted ? 'Unmute Chime Alerts' : 'Mute Chime Alerts'}
@@ -131,13 +131,6 @@ export function AdminTopBar({
             ) : (
               <Volume2 className="w-4 h-4 text-emerald-600" />
             )}
-          </button>
-          <button
-            onClick={() => playOrderChime(true)}
-            title="Test Chime Sound"
-            className="text-[10px] font-bold text-stone-500 hover:text-stone-900 px-1 border-l border-stone-200"
-          >
-            Test
           </button>
         </div>
 

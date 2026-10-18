@@ -40,20 +40,11 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
   const tableId = useMenuStore((state) => state.tableId);
   const getFormattedTable = useMenuStore((state) => state.getFormattedTable);
   const activeOrders = useMenuStore((state) => state.activeOrders);
-  const setTableId = useMenuStore((state) => state.setTableId);
 
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
-  const [selectedDemoTable, setSelectedDemoTable] = useState('T-04');
-
-  const availableTables = ['T-01', 'T-02', 'T-03', 'T-04', 'T-05', 'T-06', 'T-07', 'T-08'];
 
   const hasActiveSession = Boolean(tableId && tableId.trim().length > 0 && activeOrders.length > 0);
-
-  const handleStartDemo = (tbl: string) => {
-    setTableId(tbl);
-    router.push(`/table/${tbl.toLowerCase()}`);
-  };
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col justify-between selection:bg-amber-500 selection:text-stone-950 font-sans">
@@ -258,53 +249,8 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
           </div>
         </div>
 
-        {/* Demo Mode / Table Picker (For online evaluation, testing or walk-in browsing) */}
-        <div className="w-full p-5 rounded-2xl bg-gradient-to-br from-stone-900 to-stone-900/70 border border-amber-500/30 text-left space-y-3.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                Testing or Previewing Without a Physical Table?
-              </h4>
-            </div>
-            <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-bold">
-              Demo Mode
-            </span>
-          </div>
-
-          <p className="text-xs text-stone-300 leading-relaxed">
-            Select any table below to test live ordering, kitchen ticket flow, waiter alerts, and bill settlement directly:
-          </p>
-
-          <div className="grid grid-cols-4 gap-1.5 pt-1">
-            {availableTables.map((tbl) => (
-              <button
-                key={tbl}
-                type="button"
-                onClick={() => handleStartDemo(tbl)}
-                className={`py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer flex flex-col items-center justify-center border ${
-                  tbl === selectedDemoTable
-                    ? 'bg-amber-500 text-stone-950 border-amber-400 shadow-md shadow-amber-500/20'
-                    : 'bg-stone-800 text-stone-300 border-stone-700 hover:bg-stone-750 hover:text-white'
-                }`}
-              >
-                <span>Table {tbl.replace(/^T-?0*/i, '')}</span>
-              </button>
-            ))}
-          </div>
-
-          <Button
-            type="button"
-            onClick={() => handleStartDemo(selectedDemoTable)}
-            className="w-full py-3 h-11 bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold text-xs sm:text-sm rounded-xl shadow-lg shadow-amber-500/20 gap-2 cursor-pointer"
-          >
-            <span>Explore Menu as Table 04</span>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </div>
-
         {/* Terms & Privacy Statement Links */}
-        <div className="w-full pt-2 border-t border-stone-800/80 text-xs text-stone-400 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="w-full pt-4 border-t border-stone-800/80 text-xs text-stone-400 flex flex-col sm:flex-row items-center justify-between gap-3">
           <span className="text-[11px] text-stone-400">
             By dining & ordering, you agree to cafe policies.
           </span>
