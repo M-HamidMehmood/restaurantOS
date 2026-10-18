@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Flame,
   Coffee,
+  Copy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +31,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useMenuStore } from '@/store/useMenuStore';
+import { generateQrDataUrl } from '@/lib/qrCode';
 
 interface ScanQrLandingProps {
   detectedTableId?: string;
@@ -43,6 +45,43 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
 
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+
+  // Selected table for the QR code display (defaults to table 4 or current tableId)
+  const [selectedTable, setSelectedTable] = useState<string>(() => {
+    return detectedTableId || tableId || '4';
+  });
+  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [targetUrl, setTargetUrl] = useState<string>('');
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const rawNumber = selectedTable.replace(/^T-0*/i, '').replace(/^table-0*/i, '') || '4';
+    const slug = `t-${rawNumber.padStart(2, '0')}`;
+    const origin =
+      typeof window !== 'undefined' && window.location.origin
+        ? window.location.origin
+        : 'https://restaurant-os-nine-fawn.vercel.app';
+    const url = `${origin}/table/${slug}`;
+    setTargetUrl(url);
+
+    generateQrDataUrl(url, {
+      width: 480,
+      margin: 1,
+      darkColor: '#0c0a09',
+      lightColor: '#ffffff',
+      errorCorrectionLevel: 'H',
+    }).then((data) => {
+      if (data) setQrDataUrl(data);
+    });
+  }, [selectedTable]);
+
+  const handleCopy = () => {
+    if (targetUrl) {
+      navigator.clipboard.writeText(targetUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const hasActiveSession = Boolean(tableId && tableId.trim().length > 0 && activeOrders.length > 0);
 
@@ -121,73 +160,118 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
         </div>
 
         {/* Interactive Stylized QR Scanner Viewfinder Graphic */}
-        <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl bg-stone-900/90 border border-stone-800 p-6 flex flex-col items-center justify-center shadow-2xl shadow-amber-500/10 group">
+        <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl bg-stone-900/90 border border-stone-800 p-5 flex flex-col items-center justify-center shadow-2xl shadow-amber-500/10 group">
           {/* Viewfinder Target Brackets (Corners) */}
-          <div className="absolute top-3 left-3 w-6 h-6 border-t-3 border-l-3 border-amber-500 rounded-tl-xl"></div>
-          <div className="absolute top-3 right-3 w-6 h-6 border-t-3 border-r-3 border-amber-500 rounded-tr-xl"></div>
-          <div className="absolute bottom-3 left-3 w-6 h-6 border-b-3 border-l-3 border-amber-500 rounded-bl-xl"></div>
-          <div className="absolute bottom-3 right-3 w-6 h-6 border-b-3 border-r-3 border-amber-500 rounded-br-xl"></div>
+          <div className="absolute top-3 left-3 w-6 h-6 border-t-3 border-l-3 border-amber-500 rounded-tl-xl pointer-events-none"></div>
+          <div className="absolute top-3 right-3 w-6 h-6 border-t-3 border-r-3 border-amber-500 rounded-tr-xl pointer-events-none"></div>
+          <div className="absolute bottom-3 left-3 w-6 h-6 border-b-3 border-l-3 border-amber-500 rounded-bl-xl pointer-events-none"></div>
+          <div className="absolute bottom-3 right-3 w-6 h-6 border-b-3 border-r-3 border-amber-500 rounded-br-xl pointer-events-none"></div>
 
           {/* Animated Laser Scanning Beam */}
-          <div className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_12px_#f59e0b] animate-pulse top-1/2 -translate-y-1/2"></div>
+          <div className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_12px_#f59e0b] animate-pulse top-1/2 -translate-y-1/2 pointer-events-none"></div>
 
-          {/* Stylized QR Card in center */}
-          <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-2xl bg-white p-3 shadow-inner flex flex-col items-center justify-center">
-            {/* Real SVG QR Pattern with logo */}
-            <svg
-              viewBox="0 0 100 100"
-              className="w-full h-full text-stone-900 fill-current"
-            >
-              {/* Corner Position Detection Squares */}
-              <rect x="5" y="5" width="26" height="26" rx="4" />
-              <rect x="9" y="9" width="18" height="18" fill="white" rx="2" />
-              <rect x="13" y="13" width="10" height="10" rx="2" />
-
-              <rect x="69" y="5" width="26" height="26" rx="4" />
-              <rect x="73" y="9" width="18" height="18" fill="white" rx="2" />
-              <rect x="77" y="13" width="10" height="10" rx="2" />
-
-              <rect x="5" y="69" width="26" height="26" rx="4" />
-              <rect x="9" y="73" width="18" height="18" fill="white" rx="2" />
-              <rect x="13" y="77" width="10" height="10" rx="2" />
-
-              {/* Decorative data pixels */}
-              <rect x="36" y="8" width="8" height="8" rx="1" />
-              <rect x="48" y="8" width="8" height="8" rx="1" />
-              <rect x="36" y="20" width="8" height="8" rx="1" />
-              <rect x="48" y="20" width="8" height="8" rx="1" />
-              <rect x="58" y="20" width="6" height="6" rx="1" />
-
-              <rect x="8" y="36" width="8" height="8" rx="1" />
-              <rect x="20" y="36" width="8" height="8" rx="1" />
-              <rect x="8" y="48" width="8" height="8" rx="1" />
-              <rect x="20" y="48" width="8" height="8" rx="1" />
-
-              <rect x="68" y="36" width="8" height="8" rx="1" />
-              <rect x="80" y="36" width="8" height="8" rx="1" />
-              <rect x="68" y="48" width="8" height="8" rx="1" />
-              <rect x="80" y="48" width="8" height="8" rx="1" />
-
-              <rect x="36" y="68" width="8" height="8" rx="1" />
-              <rect x="48" y="68" width="8" height="8" rx="1" />
-              <rect x="36" y="80" width="8" height="8" rx="1" />
-              <rect x="48" y="80" width="8" height="8" rx="1" />
-              <rect x="68" y="68" width="8" height="8" rx="1" />
-              <rect x="80" y="80" width="8" height="8" rx="1" />
-
-              {/* Center Icon badge */}
-              <circle cx="50" cy="50" r="14" fill="white" />
-              <circle cx="50" cy="50" r="11" fill="#f59e0b" />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <Coffee className="w-5 h-5 text-stone-950 fill-stone-950" />
-            </div>
+          {/* Real Scannable High-Res QR Card in center */}
+          <div className="relative w-44 h-44 sm:w-48 sm:h-48 rounded-2xl bg-white p-2.5 shadow-2xl flex flex-col items-center justify-center overflow-hidden border-2 border-stone-100">
+            {qrDataUrl ? (
+              <img
+                src={qrDataUrl}
+                alt={`Scannable QR Code for Table ${selectedTable}`}
+                className="w-full h-full object-contain rounded-lg"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-stone-500 animate-pulse font-medium">
+                Generating QR code...
+              </div>
+            )}
           </div>
 
-          <span className="mt-3 text-[11px] font-bold text-amber-400 tracking-wide uppercase flex items-center gap-1.5">
-            <Camera className="w-3.5 h-3.5" />
-            Point camera to scan
-          </span>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-[11px] font-bold text-amber-400 tracking-wide uppercase flex items-center gap-1.5">
+              <Camera className="w-3.5 h-3.5" />
+              Point camera to scan
+            </span>
+            <span className="text-[10px] bg-amber-500/20 text-amber-300 font-extrabold px-2 py-0.5 rounded-full border border-amber-500/30">
+              Table {selectedTable.replace(/^T-0*/i, '').replace(/^table-0*/i, '').padStart(2, '0')}
+            </span>
+          </div>
+        </div>
+
+        {/* Quick Table Switcher & Direct Menu Action */}
+        <div className="w-full max-w-md bg-stone-900/90 border border-stone-800 rounded-2xl p-3.5 space-y-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-stone-400 font-semibold flex items-center gap-1.5">
+              <QrCode className="w-4 h-4 text-amber-500" />
+              Active Table QR Code:
+            </span>
+            <span className="font-mono text-amber-400 font-bold text-[11px] truncate max-w-[200px]">
+              {targetUrl}
+            </span>
+          </div>
+
+          {/* Quick Table Buttons (T-01 to T-08) */}
+          <div className="flex items-center justify-center gap-1.5 flex-wrap">
+            {['1', '2', '3', '4', '5', '6', '7', '8'].map((num) => {
+              const isSelected =
+                selectedTable.replace(/^T-0*/i, '').replace(/^table-0*/i, '') === num;
+              return (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setSelectedTable(num)}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20 font-black'
+                      : 'bg-stone-800 text-stone-400 hover:text-white hover:bg-stone-700'
+                  }`}
+                >
+                  Table {num.padStart(2, '0')}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tap to Open Directly (for desktop/browser users without camera) */}
+          <div className="pt-1 flex flex-col sm:flex-row items-center gap-2">
+            <Button
+              type="button"
+              onClick={() =>
+                router.push(
+                  `/table/t-${selectedTable
+                    .replace(/^T-0*/i, '')
+                    .replace(/^table-0*/i, '')
+                    .padStart(2, '0')}`
+                )
+              }
+              className="w-full sm:flex-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs h-9.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer"
+            >
+              <span>
+                Tap to Open Table{' '}
+                {selectedTable
+                  .replace(/^T-0*/i, '')
+                  .replace(/^table-0*/i, '')
+                  .padStart(2, '0')}{' '}
+                Menu
+              </span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="w-full sm:w-auto px-3 h-9.5 rounded-xl border border-stone-800 bg-stone-950 hover:bg-stone-800 text-stone-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              {copied ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-400 text-[11px]">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5 text-stone-400" />
+                  <span className="text-[11px]">Copy Link</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* The 3 Steps (Exact User Requirement) */}
