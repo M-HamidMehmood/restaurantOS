@@ -14,10 +14,14 @@ import { ActiveOrderScreen } from './ActiveOrderScreen';
 import { ActiveOrderBanner } from './ActiveOrderBanner';
 import { useMenuStore } from '@/store/useMenuStore';
 import { useMenuQuery } from '@/hooks/useMenuQuery';
+import { useCustomerOrderSync } from '@/hooks/useCustomerOrderSync';
 import { Utensils, SearchX, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const MenuInterface: React.FC = () => {
+  // Real-time synchronization of active orders and kitchen status/rejection updates
+  useCustomerOrderSync();
+
   // TanStack Query for menu data
   const { data: menuData, isLoading } = useMenuQuery();
 

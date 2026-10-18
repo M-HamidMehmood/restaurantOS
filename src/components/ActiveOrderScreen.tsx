@@ -15,6 +15,7 @@ import {
   Timer,
   FileText,
   AlertCircle,
+  XCircle,
 } from 'lucide-react';
 import {
   Dialog,
@@ -36,6 +37,7 @@ export const ActiveOrderScreen: React.FC = () => {
   const activeOrders = useMenuStore((state) => state.activeOrders);
   const selectedActiveOrderId = useMenuStore((state) => state.selectedActiveOrderId);
   const setSelectedActiveOrderId = useMenuStore((state) => state.setSelectedActiveOrderId);
+  const dismissActiveOrder = useMenuStore((state) => state.dismissActiveOrder);
   const getFormattedTable = useMenuStore((state) => state.getFormattedTable);
 
   const callWaiter = useMenuStore((state) => state.callWaiter);
@@ -63,6 +65,12 @@ export const ActiveOrderScreen: React.FC = () => {
     }
     return activeOrders[0];
   }, [activeOrders, selectedActiveOrderId]);
+
+  const isCancelled = currentOrder?.status === 'cancelled';
+  const latestRejectionMessage =
+    currentOrder?.statusHistory && currentOrder.statusHistory.length > 0
+      ? currentOrder.statusHistory[currentOrder.statusHistory.length - 1].message
+      : '';
 
   if (!currentOrder && activeOrders.length === 0) return null;
 
@@ -169,20 +177,34 @@ export const ActiveOrderScreen: React.FC = () => {
               <span className="text-[10px] text-stone-400 uppercase tracking-wider shrink-0">
                 Rounds:
               </span>
-              {activeOrders.map((ord, idx) => (
-                <button
-                  key={ord.orderId}
-                  type="button"
-                  onClick={() => setSelectedActiveOrderId(ord.orderId)}
-                  className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer ${
-                    ord.orderId === currentOrder?.orderId
-                      ? 'bg-amber-500 text-stone-950 font-bold'
-                      : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
-                  }`}
-                >
-                  Round {activeOrders.length - idx} (#{ord.orderId})
-                </button>
-              ))}
+              {activeOrders.map((ord, idx) => {
+                const isOrdCancelled = ord.status === 'cancelled';
+                return (
+                  <button
+                    key={ord.orderId}
+                    type="button"
+                    onClick={() => setSelectedActiveOrderId(ord.orderId)}
+                    className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                      ord.orderId === currentOrder?.orderId
+                        ? isOrdCancelled
+                          ? 'bg-rose-600 text-white font-black shadow-xs'
+                          : 'bg-amber-500 text-stone-950 font-bold'
+                        : isOrdCancelled
+                        ? 'bg-rose-950/80 text-rose-300 border border-rose-500/50 hover:bg-rose-900'
+                        : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
+                  >
+                    <span>
+                      Round {activeOrders.length - idx} (#{ord.orderId})
+                    </span>
+                    {isOrdCancelled && (
+                      <span className="text-[10px] font-black uppercase text-rose-200">
+                        ✕ Rejected
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -190,7 +212,60 @@ export const ActiveOrderScreen: React.FC = () => {
         {/* Scrollable Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           {/* Real-Time Live Status Tracker Card */}
-          {currentOrder && (
+          {currentOrder && isCancelled ? (
+            /* Dedicated Order Rejected / Cancelled Card */
+            <Card className="p-4 rounded-2xl border-2 border-rose-300 bg-rose-50/90 shadow-xs space-y-3.5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-600/30">
+                  <XCircle className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-black text-sm text-rose-950 uppercase tracking-tight">
+                      Order Rejected by Kitchen
+                    </h3>
+                    <Badge className="bg-rose-600 text-white font-extrabold text-[10px] uppercase px-2 py-0.5">
+                      Rejected
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-rose-800 mt-0.5 leading-relaxed">
+                    The kitchen staff was unable to prepare this order.
+                  </p>
+                </div>
+              </div>
+
+              {/* Rejection Reason from Staff */}
+              <div className="p-3 rounded-xl bg-white border border-rose-200 text-xs text-rose-900 space-y-1">
+                <span className="font-bold text-[10px] uppercase tracking-wider text-rose-600 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Reason from Kitchen Staff:
+                </span>
+                <p className="font-semibold text-xs text-stone-900 italic">
+                  &ldquo;{latestRejectionMessage || 'Dishes out of stock or kitchen closed'}&rdquo;
+                </p>
+              </div>
+
+              <div className="text-[11px] text-rose-800 bg-rose-100/60 p-2.5 rounded-xl leading-relaxed">
+                ℹ️ <strong>No Charges Made:</strong> You have not been charged for these items. You can choose alternative dishes from the menu or call your waiter for recommendations.
+              </div>
+
+              {/* Dismiss & Reorder Action */}
+              <div className="pt-1 flex gap-2">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    dismissActiveOrder(currentOrder.orderId);
+                    setIsActiveOrderOpen(false);
+                    toast.info('Rejected order dismissed. You can now select new dishes.');
+                  }}
+                  className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs h-10 rounded-xl shadow-md cursor-pointer"
+                >
+                  Dismiss & Choose Another Dish
+                </Button>
+              </div>
+            </Card>
+          ) : currentOrder ? (
+            /* Standard Live Kitchen Status Card */
             <Card className="p-4 rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/60 via-white to-stone-50 shadow-2xs space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -310,7 +385,7 @@ export const ActiveOrderScreen: React.FC = () => {
                 </span>
               </div>
             </Card>
-          )}
+          ) : null}
 
           {/* Ordered Dishes List */}
           {currentOrder && (
@@ -457,17 +532,34 @@ export const ActiveOrderScreen: React.FC = () => {
 
         {/* Footer: Order More Dishes Button */}
         <div className="p-4 bg-stone-50 border-t border-stone-200/80 space-y-2 shrink-0">
-          <Button
-            type="button"
-            variant="primary"
-            onClick={() => setIsActiveOrderOpen(false)}
-            className="w-full py-3 h-11 rounded-xl text-xs sm:text-sm font-bold shadow-md gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Order More Dishes for {getFormattedTable()}</span>
-          </Button>
+          {isCancelled ? (
+            <Button
+              type="button"
+              onClick={() => {
+                if (currentOrder) dismissActiveOrder(currentOrder.orderId);
+                setIsActiveOrderOpen(false);
+                toast.info('Rejected order dismissed. You can now select new dishes.');
+              }}
+              className="w-full py-3 h-11 rounded-xl text-xs sm:text-sm font-black bg-rose-600 hover:bg-rose-700 text-white shadow-md gap-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Dismiss & Choose Another Dish for {getFormattedTable()}</span>
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => setIsActiveOrderOpen(false)}
+              className="w-full py-3 h-11 rounded-xl text-xs sm:text-sm font-bold shadow-md gap-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Order More Dishes for {getFormattedTable()}</span>
+            </Button>
+          )}
           <p className="text-[10px] text-stone-400 text-center">
-            Active table session persists in storage • Order ID #{currentOrder?.orderId}
+            {isCancelled
+              ? `Order #${currentOrder?.orderId} was rejected • Tap above to choose another dish`
+              : `Active table session persists in storage • Order ID #${currentOrder?.orderId}`}
           </p>
         </div>
       </DialogContent>

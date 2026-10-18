@@ -62,6 +62,7 @@ interface MenuState {
   setSelectedActiveOrderId: (orderId: string | null) => void;
   recordSubmittedOrder: (order: ActiveOrder) => void;
   updateOrderStatus: (orderId: string, status: OrderStatus, message?: string) => void;
+  dismissActiveOrder: (orderId: string) => void;
   getActiveOrder: () => ActiveOrder | undefined;
 
   // Search & Filter
@@ -284,23 +285,57 @@ export const useMenuStore = create<MenuState>()(
             received: 'Order confirmed by cafe kitchen',
             preparing: 'Chef is cooking your fresh dishes in the kitchen',
             served: 'Dishes served at your table. Enjoy your meal!',
-            cancelled: 'Order was cancelled by staff',
+            cancelled: 'Order was rejected or voided by kitchen staff',
           };
+
+          const targetClean = orderId.replace(/^#/, '').trim().toLowerCase();
 
           return {
             activeOrders: state.activeOrders.map((ord) => {
-              if (ord.orderId !== orderId) return ord;
+              const currentClean = ord.orderId.replace(/^#/, '').trim().toLowerCase();
+              if (currentClean !== targetClean) return ord;
+
+              const cleanMsg = message || defaultMessages[newStatus];
               const historyEntry = {
                 status: newStatus,
                 timestamp: Date.now(),
-                message: message || defaultMessages[newStatus],
+                message: cleanMsg,
               };
+
+              // Avoid duplicate identical history entries within 10 seconds
+              const lastEntry = ord.statusHistory[ord.statusHistory.length - 1];
+              const isDupe =
+                lastEntry &&
+                lastEntry.status === newStatus &&
+                Math.abs(Date.now() - lastEntry.timestamp) < 10000;
+
               return {
                 ...ord,
                 status: newStatus,
-                statusHistory: [...ord.statusHistory, historyEntry],
+                statusHistory: isDupe
+                  ? ord.statusHistory
+                  : [...ord.statusHistory, historyEntry],
               };
             }),
+          };
+        });
+      },
+
+      dismissActiveOrder: (orderId: string) => {
+        set((state) => {
+          const targetClean = orderId.replace(/^#/, '').trim().toLowerCase();
+          const remaining = state.activeOrders.filter(
+            (o) => o.orderId.replace(/^#/, '').trim().toLowerCase() !== targetClean
+          );
+          const nextSelected =
+            state.selectedActiveOrderId?.replace(/^#/, '').trim().toLowerCase() === targetClean
+              ? remaining[0]?.orderId || null
+              : state.selectedActiveOrderId;
+
+          return {
+            activeOrders: remaining,
+            selectedActiveOrderId: nextSelected,
+            isActiveOrderOpen: remaining.length > 0 ? state.isActiveOrderOpen : false,
           };
         });
       },
