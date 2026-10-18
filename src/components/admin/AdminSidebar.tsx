@@ -217,7 +217,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
                   title={`${item.label}${isLocked ? ' (Locked: Super Admin only)' : ''}`}
                   className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
                     isActive
-                      ? 'bg-amber-500 text-white shadow-md font-bold'
+                      ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30 font-bold'
                       : isLocked
                       ? 'text-stone-500 hover:text-stone-300 hover:bg-stone-800/40 opacity-70'
                       : 'text-stone-300 hover:text-white hover:bg-stone-800/70'
@@ -247,7 +247,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
               href={item.href}
               className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs transition-all ${
                 isActive
-                  ? 'bg-amber-500 text-white font-bold shadow-sm'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold shadow-md shadow-amber-500/25 border border-amber-400/30'
                   : isLocked
                   ? 'text-stone-500 hover:text-stone-300 hover:bg-stone-800/40 opacity-70'
                   : 'text-stone-300 hover:text-white hover:bg-stone-800/70'

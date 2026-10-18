@@ -168,7 +168,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
           <div className="absolute bottom-3 right-3 w-6 h-6 border-b-3 border-r-3 border-amber-500 rounded-br-xl pointer-events-none"></div>
 
           {/* Animated Laser Scanning Beam */}
-          <div className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_12px_#f59e0b] animate-pulse top-1/2 -translate-y-1/2 pointer-events-none"></div>
+          <div className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_16px_var(--color-amber-400)] animate-pulse top-1/2 -translate-y-1/2 pointer-events-none"></div>
 
           {/* Real Scannable High-Res QR Card in center */}
           <div className="relative w-44 h-44 sm:w-48 sm:h-48 rounded-2xl bg-white p-2.5 shadow-2xl flex flex-col items-center justify-center overflow-hidden border-2 border-stone-100">
@@ -220,7 +220,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
                   onClick={() => setSelectedTable(num)}
                   className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20 font-black'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30 ring-1 ring-amber-300/40 font-black'
                       : 'bg-stone-800 text-stone-400 hover:text-white hover:bg-stone-700'
                   }`}
                 >
@@ -242,7 +242,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
                     .padStart(2, '0')}`
                 )
               }
-              className="w-full sm:flex-1 bg-amber-500 hover:bg-amber-400 text-white font-black text-xs h-9.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer"
+              className="w-full sm:flex-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-black text-xs h-9.5 rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/30 cursor-pointer active:scale-[0.99] transition-all"
             >
               <span>
                 Tap to Open Table{' '}
