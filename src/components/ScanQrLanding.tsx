@@ -86,13 +86,13 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
   const hasActiveSession = Boolean(tableId && tableId.trim().length > 0 && activeOrders.length > 0);
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col justify-between selection:bg-amber-500 selection:text-stone-950 font-sans">
+    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col justify-between selection:bg-amber-500 selection:text-white font-sans">
       {/* Top Navigation Bar */}
       <header className="w-full border-b border-stone-800/80 bg-stone-900/70 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-stone-950 shadow-md shadow-amber-500/20 font-black text-base">
-              <Flame className="w-5 h-5 fill-stone-950" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-md shadow-amber-500/20 font-black text-base">
+              <Flame className="w-5 h-5 fill-white" />
             </div>
             <div>
               <h1 className="text-sm font-extrabold tracking-tight text-white flex items-center gap-1.5">
@@ -139,7 +139,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
             <Button
               size="sm"
               onClick={() => router.push(`/table/${tableId.toLowerCase()}`)}
-              className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shrink-0 cursor-pointer"
+              className="bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs shrink-0 cursor-pointer"
             >
               Resume Order
             </Button>
@@ -220,7 +220,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
                   onClick={() => setSelectedTable(num)}
                   className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-500 text-stone-950 shadow-md shadow-amber-500/20 font-black'
+                      ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20 font-black'
                       : 'bg-stone-800 text-stone-400 hover:text-white hover:bg-stone-700'
                   }`}
                 >
@@ -242,7 +242,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
                     .padStart(2, '0')}`
                 )
               }
-              className="w-full sm:flex-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs h-9.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer"
+              className="w-full sm:flex-1 bg-amber-500 hover:bg-amber-400 text-white font-black text-xs h-9.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer"
             >
               <span>
                 Tap to Open Table{' '}
@@ -285,7 +285,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
           <div className="grid grid-cols-1 gap-3 w-full text-left">
             {/* Step 1 */}
             <div className="p-4 rounded-2xl bg-stone-900/80 border border-stone-800/80 flex items-start gap-3.5 transition-all hover:border-stone-700">
-              <div className="w-8 h-8 rounded-xl bg-amber-500 text-stone-950 font-black text-sm flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
                 1
               </div>
               <div className="flex-1">
@@ -301,7 +301,7 @@ export const ScanQrLanding: React.FC<ScanQrLandingProps> = ({ detectedTableId })
 
             {/* Step 2 */}
             <div className="p-4 rounded-2xl bg-stone-900/80 border border-stone-800/80 flex items-start gap-3.5 transition-all hover:border-stone-700">
-              <div className="w-8 h-8 rounded-xl bg-amber-500 text-stone-950 font-black text-sm flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
                 2
               </div>
               <div className="flex-1">

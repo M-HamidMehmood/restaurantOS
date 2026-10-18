@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+@theme {
+  --color-amber-50: #faf2fe;
+  --color-amber-100: #f1dcfd;
+  --color-amber-200: #d08efa;
+  --color-amber-300: #a73de0;
+  --color-amber-400: #7f0dbb;
+  --color-amber-500: #5e008c;
+  --color-amber-600: #500078;
+  --color-amber-700: #420063;
+  --color-amber-800: #33004d;
+  --color-amber-900: #26003b;
+  --color-amber-950: #170024;
+
+  --color-brand-50: #faf2fe;
+  --color-brand-100: #f1dcfd;
+  --color-brand-200: #d08efa;
+  --color-brand-300: #a73de0;
+  --color-brand-400: #7f0dbb;
+  --color-brand-500: #5e008c;
+  --color-brand-600: #500078;
+  --color-brand-700: #420063;
+  --color-brand-800: #33004d;
+  --color-brand-900: #26003b;
+  --color-brand-950: #170024;
+}
+
 @layer base {
   :root {
     --background: 30 20% 98%;
@@ -8,19 +34,19 @@
     --card-foreground: 24 10% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 24 10% 10%;
-    --primary: 38 92% 50%;
-    --primary-foreground: 24 10% 10%;
-    --secondary: 30 15% 94%;
-    --secondary-foreground: 24 10% 15%;
-    --muted: 30 15% 94%;
-    --muted-foreground: 25 5% 45%;
-    --accent: 38 92% 95%;
-    --accent-foreground: 24 10% 10%;
+    --primary: 280 100% 27.5%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 280 20% 96%;
+    --secondary-foreground: 280 100% 25%;
+    --muted: 280 15% 95%;
+    --muted-foreground: 280 10% 45%;
+    --accent: 280 100% 96%;
+    --accent-foreground: 280 100% 27.5%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 30 15% 90%;
-    --input: 30 15% 90%;
-    --ring: 38 92% 50%;
+    --border: 280 15% 90%;
+    --input: 280 15% 90%;
+    --ring: 280 100% 27.5%;
     --radius: 0.85rem;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);

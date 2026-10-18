@@ -188,7 +188,7 @@ export const ActiveOrderScreen: React.FC = () => {
                       ord.orderId === currentOrder?.orderId
                         ? isOrdCancelled
                           ? 'bg-rose-600 text-white font-black shadow-xs'
-                          : 'bg-amber-500 text-stone-950 font-bold'
+                          : 'bg-amber-500 text-white font-bold'
                         : isOrdCancelled
                         ? 'bg-rose-950/80 text-rose-300 border border-rose-500/50 hover:bg-rose-900'
                         : 'bg-stone-800 text-stone-300 hover:bg-stone-700'

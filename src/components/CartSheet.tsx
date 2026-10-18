@@ -93,7 +93,7 @@ export const CartSheet: React.FC = () => {
             className="w-full flex items-center justify-between bg-stone-900/95 hover:bg-stone-900 active:scale-[0.98] text-white py-3.5 px-4 rounded-2xl shadow-xl border border-stone-800 backdrop-blur-md transition-all cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <div className="relative w-8 h-8 rounded-xl bg-amber-500 text-stone-900 flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+              <div className="relative w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
                 <ShoppingBag className="w-4 h-4" />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
                   {totalCartCount}

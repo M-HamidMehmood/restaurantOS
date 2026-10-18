@@ -126,12 +126,12 @@ export function TableFloorGrid({
           onClick={() => setFilter('bill_requested')}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
             filter === 'bill_requested'
-              ? 'bg-amber-500 text-stone-950 border-amber-600 shadow-sm'
+              ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
               : 'bg-white border-stone-200/80 text-stone-800 hover:border-amber-300'
           }`}
         >
           <div className="flex items-center justify-between text-xs font-semibold">
-            <span className={filter === 'bill_requested' ? 'text-stone-900 font-bold' : 'text-amber-700'}>
+            <span className={filter === 'bill_requested' ? 'text-white font-bold' : 'text-amber-700'}>
               Bill Requested
             </span>
             <Receipt className="w-4 h-4 text-amber-600" />
@@ -334,7 +334,7 @@ export function TableFloorGrid({
                 <span className="text-[11px] font-semibold text-stone-400 group-hover:text-stone-600 transition-colors">
                   {isAvailable ? 'View Table' : 'Checkout & Details'}
                 </span>
-                <div className="w-6 h-6 rounded-lg bg-stone-100 group-hover:bg-amber-500 group-hover:text-stone-950 flex items-center justify-center text-stone-500 transition-all">
+                <div className="w-6 h-6 rounded-lg bg-stone-100 group-hover:bg-amber-500 group-hover:text-white flex items-center justify-center text-stone-500 transition-all">
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </div>

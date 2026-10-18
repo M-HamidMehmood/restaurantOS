@@ -89,7 +89,7 @@ export const ActiveOrderBanner: React.FC = () => {
                     ? 'bg-emerald-200 text-emerald-900'
                     : isPreparing
                     ? 'bg-amber-200 text-amber-900'
-                    : 'bg-amber-500 text-stone-900'
+                    : 'bg-amber-500 text-white'
                 }`}
               >
                 {isCancelled ? 'REJECTED' : latestOrder.status}

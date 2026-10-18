@@ -60,7 +60,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
       href: '/admin',
       icon: Activity,
       badge: activeOrdersCount > 0 ? activeOrdersCount : undefined,
-      badgeColor: 'bg-amber-500 text-stone-950',
+      badgeColor: 'bg-amber-500 text-white',
       description: 'Active kitchen orders',
       superAdminOnly: false,
     },
@@ -99,7 +99,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
           {!isCollapsed ? (
             <>
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-stone-950 shadow-md font-black text-lg shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md font-black text-lg shrink-0">
                   <Flame className="w-5 h-5 fill-current" />
                 </div>
                 <div className="min-w-0 truncate">
@@ -125,7 +125,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
           ) : (
             <div className="w-full flex flex-col items-center gap-2">
               <div
-                className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-stone-950 shadow-md font-black text-lg shrink-0 cursor-pointer"
+                className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md font-black text-lg shrink-0 cursor-pointer"
                 title="Chaska & Chai Cafe"
                 onClick={toggleCollapsed}
               >
@@ -166,7 +166,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
                     <div className="flex items-center gap-1 mt-0.5">
                       <span
                         className={`inline-block text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-md ${
-                          isSuperAdmin ? 'bg-amber-500 text-stone-950' : 'bg-emerald-500/20 text-emerald-300'
+                          isSuperAdmin ? 'bg-amber-500 text-white' : 'bg-emerald-500/20 text-emerald-300'
                         }`}
                       >
                         {isSuperAdmin ? 'Super Admin' : 'Admin'}
@@ -217,7 +217,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
                   title={`${item.label}${isLocked ? ' (Locked: Super Admin only)' : ''}`}
                   className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
                     isActive
-                      ? 'bg-amber-500 text-stone-950 shadow-md font-bold'
+                      ? 'bg-amber-500 text-white shadow-md font-bold'
                       : isLocked
                       ? 'text-stone-500 hover:text-stone-300 hover:bg-stone-800/40 opacity-70'
                       : 'text-stone-300 hover:text-white hover:bg-stone-800/70'
@@ -226,7 +226,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
                   <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
 
                   {item.badge !== undefined && !isLocked && (
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-black flex items-center justify-center bg-amber-500 text-stone-950 shadow-xs border-2 border-stone-900">
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-black flex items-center justify-center bg-amber-500 text-white shadow-xs border-2 border-stone-900">
                       {item.badge}
                     </span>
                   )}
@@ -247,7 +247,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
               href={item.href}
               className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs transition-all ${
                 isActive
-                  ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                  ? 'bg-amber-500 text-white font-bold shadow-sm'
                   : isLocked
                   ? 'text-stone-500 hover:text-stone-300 hover:bg-stone-800/40 opacity-70'
                   : 'text-stone-300 hover:text-white hover:bg-stone-800/70'
@@ -257,7 +257,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
                 <Icon
                   className={`w-4 h-4 shrink-0 ${
                     isActive
-                      ? 'text-stone-950 stroke-[2.5]'
+                      ? 'text-white stroke-[2.5]'
                       : isLocked
                       ? 'text-stone-600'
                       : 'text-stone-400'
@@ -271,7 +271,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
                   <span
                     className={`text-[10px] mt-0.5 block leading-none truncate ${
                       isActive
-                        ? 'text-stone-900 font-medium'
+                        ? 'text-purple-100 font-medium'
                         : isLocked
                         ? 'text-stone-500'
                         : 'text-stone-400'
@@ -286,7 +286,7 @@ export function AdminSidebar({ activeOrdersCount = 0 }: AdminSidebarProps) {
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-tight shrink-0 ${
                     isActive
-                      ? 'bg-stone-950 text-amber-300'
+                      ? 'bg-white text-stone-950'
                       : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                   }`}
                 >

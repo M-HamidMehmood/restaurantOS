@@ -106,8 +106,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ categories }) => {
                   <span
                     className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                       isActive
-                        ? 'bg-amber-400 text-stone-900'
-                        : 'bg-amber-100 text-amber-800'
+                        ? 'bg-amber-400 text-white'
+                        : 'bg-amber-100 text-amber-900'
                     }`}
                   >
                     {cat.badge}

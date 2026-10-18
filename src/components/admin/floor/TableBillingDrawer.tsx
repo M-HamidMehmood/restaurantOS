@@ -734,7 +734,7 @@ export function TableBillingDrawer({
                       }}
                       className={`px-2 py-1 text-xs font-bold rounded-lg border transition-all ${
                         discountType === 'percentage' && discountValue === pct
-                          ? 'bg-amber-500 border-amber-600 text-stone-950 shadow-xs'
+                          ? 'bg-amber-500 border-amber-600 text-white shadow-xs'
                           : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
                       }`}
                     >

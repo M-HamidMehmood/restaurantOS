@@ -257,7 +257,7 @@ export default function TableQrSetupPage() {
                 onClick={() => setDomainMode('prod')}
                 className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
                   domainMode === 'prod'
-                    ? 'bg-amber-500 text-stone-950 shadow-xs font-black'
+                    ? 'bg-amber-500 text-white shadow-xs font-black'
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
@@ -274,7 +274,7 @@ export default function TableQrSetupPage() {
                 onClick={() => setDomainMode('local')}
                 className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
                   domainMode === 'local'
-                    ? 'bg-amber-500 text-stone-950 shadow-xs font-black'
+                    ? 'bg-amber-500 text-white shadow-xs font-black'
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >
@@ -289,7 +289,7 @@ export default function TableQrSetupPage() {
                 onClick={() => setDomainMode('custom')}
                 className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
                   domainMode === 'custom'
-                    ? 'bg-amber-500 text-stone-950 shadow-xs font-black'
+                    ? 'bg-amber-500 text-white shadow-xs font-black'
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                 }`}
               >

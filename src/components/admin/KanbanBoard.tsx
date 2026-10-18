@@ -37,7 +37,7 @@ export function KanbanBoard({
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
             <h2 className="font-extrabold text-sm text-stone-900 tracking-tight">Pending Review</h2>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-stone-950 font-black text-xs shadow-2xs">
+          <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-xs shadow-2xs">
             {pendingOrders.length}
           </span>
         </div>

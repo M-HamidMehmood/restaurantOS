@@ -185,7 +185,7 @@ export function CompactListView({
                             </button>
                             <button
                               onClick={() => onAccept(order.id)}
-                              className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-stone-950 text-xs font-bold rounded-lg flex items-center gap-1 shadow-2xs transition-all active:scale-95"
+                              className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-2xs transition-all active:scale-95"
                             >
                               <ChefHat className="w-3 h-3" />
                               Accept
@@ -354,7 +354,7 @@ export function CompactListView({
                       onAccept(selectedOrderDetail.id);
                       setSelectedOrderDetail(null);
                     }}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-stone-950 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all"
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all"
                   >
                     <ChefHat className="w-3.5 h-3.5" />
                     <span>Accept Order</span>

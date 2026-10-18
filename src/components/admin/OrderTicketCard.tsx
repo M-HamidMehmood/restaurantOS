@@ -176,7 +176,7 @@ export function OrderTicketCard({
               </button>
               <button
                 onClick={() => onAccept(order.id)}
-                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-stone-950 text-xs font-bold rounded-xl shadow-xs flex items-center gap-1 transition-all active:scale-95"
+                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1 transition-all active:scale-95"
               >
                 <ChefHat className="w-3.5 h-3.5" />
                 Accept Order

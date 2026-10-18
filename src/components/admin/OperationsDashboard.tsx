@@ -119,7 +119,7 @@ export function OperationsDashboard() {
                   <button
                     onClick={() => setStatusFilter('active')}
                     className={`px-2.5 py-1 rounded-lg transition-colors ${
-                      statusFilter === 'active' ? 'bg-amber-500 text-stone-950 font-bold' : 'text-stone-600 hover:bg-stone-100'
+                      statusFilter === 'active' ? 'bg-amber-500 text-white font-bold' : 'text-stone-600 hover:bg-stone-100'
                     }`}
                   >
                     Active ({activeOrdersCount})
