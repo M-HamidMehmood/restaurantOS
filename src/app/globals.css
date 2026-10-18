@@ -1,6 +1,19 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand Primary Royal Purple Spectrum (Base: #5E008C) */
+  --color-brand-50: #faf2fe;
+  --color-brand-100: #f1dcfd;
+  --color-brand-200: #d08efa;
+  --color-brand-300: #a73de0;
+  --color-brand-400: #7f0dbb;
+  --color-brand-500: #5e008c;
+  --color-brand-600: #500078;
+  --color-brand-700: #420063;
+  --color-brand-800: #33004d;
+  --color-brand-900: #26003b;
+  --color-brand-950: #170024;
+
   --color-amber-50: #faf2fe;
   --color-amber-100: #f1dcfd;
   --color-amber-200: #d08efa;
@@ -13,17 +26,18 @@
   --color-amber-900: #26003b;
   --color-amber-950: #170024;
 
-  --color-brand-50: #faf2fe;
-  --color-brand-100: #f1dcfd;
-  --color-brand-200: #d08efa;
-  --color-brand-300: #a73de0;
-  --color-brand-400: #7f0dbb;
-  --color-brand-500: #5e008c;
-  --color-brand-600: #500078;
-  --color-brand-700: #420063;
-  --color-brand-800: #33004d;
-  --color-brand-900: #26003b;
-  --color-brand-950: #170024;
+  /* Theme Yellow & Gold Spectrum (Replacing Black/Dark Surfaces) */
+  --color-yellow-50: #fefce8;
+  --color-yellow-100: #fef9c3;
+  --color-yellow-200: #fef08a;
+  --color-yellow-300: #fde047;
+  --color-yellow-400: #facc15;
+  --color-yellow-500: #eab308;
+  --color-yellow-600: #ca8a04;
+  --color-yellow-700: #a16207;
+  --color-yellow-800: #854d0e;
+  --color-yellow-900: #713f12;
+  --color-yellow-950: #422006;
 }
 
 @layer base {
@@ -36,11 +50,11 @@
     --popover-foreground: 24 10% 10%;
     --primary: 280 100% 27.5%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 280 20% 96%;
-    --secondary-foreground: 280 100% 25%;
+    --secondary: 48 96% 53%;
+    --secondary-foreground: 280 100% 15%;
     --muted: 280 15% 95%;
     --muted-foreground: 280 10% 45%;
-    --accent: 280 100% 96%;
+    --accent: 48 96% 89%;
     --accent-foreground: 280 100% 27.5%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -88,6 +102,238 @@
 
 .animate-soft-pulse {
   animation: soft-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ==========================================================================
+   Global Theme Architecture: Black Surfaces -> Yellow Palette & Shades
+   ========================================================================== */
+
+/* 1. Admin Sidebar: Transform dark background to golden yellow theme */
+aside.bg-stone-900,
+aside.bg-stone-950 {
+  background: linear-gradient(180deg, #fefce8 0%, #fef08a 25%, #facc15 65%, #eab308 100%) !important;
+  border-right-color: #ca8a04 !important;
+  color: #170024 !important;
+}
+
+aside.bg-stone-900 h1,
+aside.bg-stone-950 h1 {
+  color: #170024 !important;
+}
+
+aside.bg-stone-900 .border-stone-800,
+aside.bg-stone-900 .border-stone-800\/80,
+aside.bg-stone-900 .border-stone-700\/50,
+aside.bg-stone-950 .border-stone-800,
+aside.bg-stone-950 .border-stone-800\/80,
+aside.bg-stone-950 .border-stone-700\/50 {
+  border-color: rgba(161, 98, 7, 0.25) !important;
+}
+
+aside.bg-stone-900 .text-stone-400,
+aside.bg-stone-900 .text-stone-300,
+aside.bg-stone-900 .text-stone-500,
+aside.bg-stone-950 .text-stone-400,
+aside.bg-stone-950 .text-stone-300,
+aside.bg-stone-950 .text-stone-500 {
+  color: #422006 !important;
+}
+
+aside.bg-stone-900 .bg-stone-950\/60,
+aside.bg-stone-950 .bg-stone-950\/60 {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(202, 138, 4, 0.45) !important;
+}
+
+aside.bg-stone-900 .bg-stone-950\/60 p,
+aside.bg-stone-950 .bg-stone-950\/60 p {
+  color: #170024 !important;
+}
+
+aside.bg-stone-900 .bg-stone-900,
+aside.bg-stone-950 .bg-stone-900 {
+  background-color: rgba(234, 179, 8, 0.95) !important;
+  border-top-color: #ca8a04 !important;
+}
+
+aside.bg-stone-900 .bg-stone-800\/60,
+aside.bg-stone-950 .bg-stone-800\/60 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: #ca8a04 !important;
+  color: #170024 !important;
+}
+
+aside.bg-stone-900 .bg-stone-800\/60:hover,
+aside.bg-stone-950 .bg-stone-800\/60:hover {
+  background-color: #ffffff !important;
+}
+
+aside.bg-stone-900 a:not([class*="bg-amber"]),
+aside.bg-stone-950 a:not([class*="bg-amber"]) {
+  color: #170024 !important;
+}
+
+aside.bg-stone-900 a:not([class*="bg-amber"]) *,
+aside.bg-stone-950 a:not([class*="bg-amber"]) * {
+  color: #170024 !important;
+}
+
+aside.bg-stone-900 a:not([class*="bg-amber"]):hover,
+aside.bg-stone-950 a:not([class*="bg-amber"]):hover {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  color: #170024 !important;
+}
+
+aside.bg-stone-900 button[class*="text-rose"],
+aside.bg-stone-950 button[class*="text-rose"] {
+  background-color: rgba(225, 29, 72, 0.15) !important;
+  color: #9f1239 !important;
+  border-color: rgba(225, 29, 72, 0.35) !important;
+  font-weight: 800 !important;
+}
+
+aside.bg-stone-900 button[class*="text-rose"]:hover,
+aside.bg-stone-950 button[class*="text-rose"]:hover {
+  background-color: rgba(225, 29, 72, 0.25) !important;
+}
+
+/* 2. Customer Menu Floating Order Bar (was black -> now radiant golden yellow) */
+aside[aria-label="Order summary floating bar"] > button {
+  background: linear-gradient(135deg, #fef08a 0%, #fde047 30%, #facc15 70%, #eab308 100%) !important;
+  color: #170024 !important;
+  border: 1.5px solid #ca8a04 !important;
+  box-shadow: 0 10px 25px -5px rgba(234, 179, 8, 0.45), 0 8px 10px -6px rgba(234, 179, 8, 0.35) !important;
+}
+
+aside[aria-label="Order summary floating bar"] .text-stone-200 {
+  color: #422006 !important;
+  font-weight: 700 !important;
+}
+
+aside[aria-label="Order summary floating bar"] .text-amber-400 {
+  color: #5e008c !important;
+  font-weight: 900 !important;
+  font-size: 1.05rem !important;
+}
+
+aside[aria-label="Order summary floating bar"] .bg-white\/10 {
+  background-color: #5e008c !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(94, 0, 140, 0.35) !important;
+}
+
+/* 3. Customer Digital Menu Header (Top bar Table Badge was black -> now yellow) */
+header .bg-stone-900,
+header .bg-stone-950 {
+  background: linear-gradient(135deg, #fef08a 0%, #facc15 100%) !important;
+  color: #170024 !important;
+  border: 1px solid #ca8a04 !important;
+  box-shadow: 0 1px 3px rgba(202, 138, 4, 0.25) !important;
+}
+
+header .bg-stone-900 span,
+header .bg-stone-950 span {
+  color: #170024 !important;
+}
+
+/* 4. Scan QR Landing Screen: Black -> Radiant Warm Golden Cafe Theme */
+.min-h-screen.bg-stone-950 {
+  background: linear-gradient(180deg, #fefce8 0%, #fef9c3 25%, #fef08a 60%, #fde047 100%) !important;
+  color: #170024 !important;
+}
+
+.min-h-screen.bg-stone-950 header {
+  background-color: rgba(254, 249, 195, 0.9) !important;
+  border-bottom-color: rgba(202, 138, 4, 0.4) !important;
+  color: #170024 !important;
+}
+
+.min-h-screen.bg-stone-950 header h1,
+.min-h-screen.bg-stone-950 h2,
+.min-h-screen.bg-stone-950 h3 {
+  color: #170024 !important;
+}
+
+.min-h-screen.bg-stone-950 .bg-stone-900\/90,
+.min-h-screen.bg-stone-950 .bg-stone-900\/80,
+.min-h-screen.bg-stone-950 .bg-stone-900\/70,
+.min-h-screen.bg-stone-950 .bg-stone-900 {
+  background-color: #ffffff !important;
+  border-color: #facc15 !important;
+  box-shadow: 0 10px 25px -5px rgba(202, 138, 4, 0.15) !important;
+  color: #170024 !important;
+}
+
+.min-h-screen.bg-stone-950 .text-stone-100,
+.min-h-screen.bg-stone-950 .text-stone-300,
+.min-h-screen.bg-stone-950 .text-stone-400 {
+  color: #422006 !important;
+}
+
+.min-h-screen.bg-stone-950 .bg-stone-800 {
+  background-color: #fef08a !important;
+  border-color: #facc15 !important;
+  color: #170024 !important;
+}
+
+.min-h-screen.bg-stone-950 .bg-stone-800:hover {
+  background-color: #fde047 !important;
+  color: #170024 !important;
+}
+
+.min-h-screen.bg-stone-950 footer {
+  background-color: rgba(254, 240, 138, 0.6) !important;
+  border-top-color: #ca8a04 !important;
+}
+
+/* 5. Floor Grid "All Tables" Card & Table Chips (was black -> now yellow) */
+button.bg-stone-900,
+button.bg-stone-950,
+div.bg-stone-900:not([class*="fixed"]):not([class*="backdrop"]):not([class*="dialog"]):not(aside *),
+div.bg-stone-950:not([class*="fixed"]):not([class*="backdrop"]):not([class*="dialog"]):not(aside *) {
+  background: linear-gradient(135deg, #fef08a 0%, #facc15 100%) !important;
+  color: #170024 !important;
+  border: 1.5px solid #ca8a04 !important;
+}
+
+button.bg-stone-900 *,
+button.bg-stone-950 *,
+div.bg-stone-900:not([class*="fixed"]):not([class*="backdrop"]):not([class*="dialog"]):not(aside *) *,
+div.bg-stone-950:not([class*="fixed"]):not([class*="backdrop"]):not([class*="dialog"]):not(aside *) * {
+  color: #170024 !important;
+}
+
+button.bg-stone-900:hover,
+button.bg-stone-950:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #fef08a 100%) !important;
+}
+
+/* 6. Table Number Chips in Cards (T-01, T-04, etc. were black -> now yellow) */
+span.bg-stone-900.text-white,
+div.bg-stone-900.text-white:not([class*="kot"]):not([class*="bill"]) {
+  background: linear-gradient(135deg, #fef08a 0%, #facc15 100%) !important;
+  color: #170024 !important;
+  border: 1px solid #ca8a04 !important;
+  font-weight: 800 !important;
+}
+
+/* 7. Waiter Alert Banner & Action Badges (was black -> now yellow with purple text) */
+.bg-stone-950.text-amber-300,
+.bg-stone-950.text-white {
+  background-color: #fef08a !important;
+  color: #5e008c !important;
+  border: 1px solid #ca8a04 !important;
+}
+
+/* 8. Active Order Screen Modal Header (was black -> now warm golden header) */
+div.bg-stone-900.text-white:has(button[title*="Close"], button[aria-label*="Back"]) {
+  background: linear-gradient(135deg, #fef08a 0%, #facc15 100%) !important;
+  color: #170024 !important;
+  border-bottom: 1.5px solid #ca8a04 !important;
+}
+
+div.bg-stone-900.text-white:has(button[title*="Close"], button[aria-label*="Back"]) * {
+  color: #170024 !important;
 }
 
 /* ==========================================================================
